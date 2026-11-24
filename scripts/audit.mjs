@@ -124,6 +124,11 @@ const LLM_FILLER_REGEX =
 
 const KICKER_SPAM_REGEX = /\buppercase\b[^"'`]*\btracking-(?:widest|\[0\.[123]\d*em\])/;
 
+const INTERNAL_TELEMETRY_REGEX =
+  /(초당\s*처리량|열린\s*(?:브라우저\s*)?탭|전송\s*대기\s*알림|큐\s*대기|워커\s*상태|req\/s\b|건\/초)/i;
+
+const ERROR_COUNTER_TERMS_REGEX = /(격리|수집\s*오류|개편\s*오류|처리\s*오류|실패\s*건수|대기\s*중인\s*작업|누적\s*품질)/;
+
 const SHADOW_REGEX = /(box-shadow|drop-shadow|text-shadow|\bshadow-|\bshadow\b)/i;
 const SAFE_INSET_BOX_SHADOW_REGEX =
   /box-shadow\s*:\s*(?:inset\s+0(?:px)?\s+0(?:px)?\s+0(?:px)?\s+(?:[12]px|1000px)\s+[^;]+|0(?:px)?\s+0(?:px)?\s+0(?:px)?\s+(?:[12]px|1000px)\s+[^;]+\binset\b)/i;
@@ -467,6 +472,26 @@ for (const file of files) {
       if (/lg:grid-cols-3/.test(code)) {
         fail('anti-slop', file, lineNo, `3-up equal card grid (lg:grid-cols-3) forbidden`);
       }
+      if (/(?:^|[\s"'`])(?:sm:|md:|lg:|xl:)?grid-cols-4\b/.test(code) && !/(calendar|swatch|gallery|photo|day)/i.test(r)) {
+        warn(
+          'earn-your-pixels-50-gate',
+          file,
+          lineNo,
+          '4-column KPI/stat strip detected. Apply the >50% Necessity Gate (Manga-Panel Rule): omit speculative stat strips until >50% of users genuinely need every metric.',
+        );
+      }
+      if (
+        /(?:^|[\s"'`])(?:sm:|md:)?grid-cols-3\b/.test(code) &&
+        !/role=["']tablist["']/.test(code) &&
+        ERROR_COUNTER_TERMS_REGEX.test(content)
+      ) {
+        warn(
+          'earn-your-pixels-50-gate',
+          file,
+          lineNo,
+          '3-column error/status counter strip detected. Follow Silence When Healthy: hide zero-count error/quarantine boxes when healthy and surface one alert only when count > 0.',
+        );
+      }
       if (/border-l-4/.test(code)) {
         fail('anti-slop', file, lineNo, `Left border accent stripe (border-l-4) forbidden`);
       }
@@ -521,6 +546,15 @@ for (const file of files) {
           file,
           lineNo,
           `LLM filler / happy-talk phrase "${fillerMatch[0]}" detected. Apply the 70% Copy Purge rule and re-layout around concrete essential copy.`,
+        );
+      }
+      const telemetryMatch = code.match(INTERNAL_TELEMETRY_REGEX);
+      if (telemetryMatch) {
+        warn(
+          'earn-your-pixels-50-gate',
+          file,
+          lineNo,
+          `Internal plumbing telemetry "${telemetryMatch[0]}" detected in user UI. Omit developer stats unless >50% of users explicitly need them.`,
         );
       }
       if (!isLegalOrTermsFile && /[가-힣]/.test(code) && !/(className=|import\s+|from\s+['"]|aria-label=|placeholder=)/.test(code)) {
@@ -592,7 +626,7 @@ if (findings.length === 0) {
   console.log('  • Clean multi-channel badges & punctuation hygiene (0 em-dash/middot metric walls)');
   console.log('  • Breathable viewport scroll ergonomics (0 h-screen traps, natural scroll first)');
   console.log('  • Anti-AI-slop rules (0 forbidden patterns, glass surfaces: ' + glassBlurCount + '/1)');
-  console.log('  • Zero-duplication & 70% copy-purge hygiene (essential concise copy only)');
+  console.log('  • >50% necessity gate (Manga-Panel Rule) & 70% copy-purge hygiene');
   console.log('  • Plain-Korean readability & >= 14px consumer typography');
   console.log('  • Strict 4-layer Clean Architecture dependency boundaries');
   if (runBuild && buildPassed) {

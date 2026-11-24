@@ -20,7 +20,9 @@ Grounded in **Nielsen Norman Group ("Scrolling and Attention" & "The Fold Manife
 
 - **Universal Mobile Rule**: NEVER use `h-screen` or `min-h-screen` (`100vh` clips behind mobile browser chrome). Always use `min-h-[100dvh]` and include `interactive-widget=resizes-content` in `<meta name="viewport">`.
 
-### Post-Purge Structural Re-Layout (Pairing 70% Copy Cut with Breathable Composition)
+### Post-Purge Structural Re-Layout & Exception-Only Disclosure ("Silence When Healthy")
+- Apply the **`>50%` Necessity Gate (Manga-Panel Rule)** BEFORE layout: omit speculative top 3-up/4-up KPI strips, internal plumbing telemetry (`열린 탭 0개`, `초당 처리량 0.0`), and permanent all-zero error/quarantine boxes (`격리 0 | 오류 0`) so the user lands immediately on their actual work without scrolling past dead telemetry.
+- Follow **Silence When Healthy**: show zero error panels when `errors === 0`, and surface ONE calm, actionable banner/badge strictly when `count > 0` (never style `0` in danger red/amber).
 - Cutting ~70% of redundant LLM copy directly upgrades spatial ergonomics: instead of shrinking boxes or leaving dead holes inside old multi-card grids, **re-layout the page from scratch around the surviving ~30% essential copy**.
 - Replace text-padded 3-column card grids with clean 2-column focal splits, hairline `divide-y` stat lists, or open typographic sections (`py-14`–`py-24`) where generous whitespace frames a single unmistakable action and lets the next section's Peek Effect sit cleanly near the fold.
 

@@ -1,6 +1,24 @@
-# UX Writing, 70% Copy Purge & Re-Layout, Zero-Duplication & Anti-AI-Slop Rules
+# UX Writing, >50% Necessity Gate, 70% Copy Purge & Re-Layout, and Anti-AI-Slop Rules
 
-## 0. Mandatory Two-Pass Protocol: 70% LLM Copy Purge & Structural Re-Layout
+## 0. The >50% Necessity Gate ("Manga-Panel Editing" / 만화책 컷 원칙)
+
+A great interface is edited like a great comic/manga (**만화책**): **include ONLY the scenes needed to advance the user's current action — cut every unnecessary inner monologue, flashback, and speculative "just-in-case" panel.**
+
+### Default = OMIT (Earn Every Pixel)
+- Before adding ANY KPI card, counter box, summary strip, or status widget, ask:
+  > *"Would more than 50% of real users genuinely need this right now to decide their next action, or have enough users actively asked for it?"*
+- If the answer is **NO** → **leave it OUT.** Wait until >50% of users say it is needed or real user demand proves it. Never pad the top of an app with speculative stat cards just to "make it look like a dashboard."
+
+### 4 Banned Speculative Dashboard Patterns (Eliminated by Default)
+1. **Vanity 3-Up / 4-Up Top KPI Strips**: Rows of equal boxes (`초당 처리량 0.0 건/초`, `대기 중인 작업 0건`, `개편 완료 0곳`, `누적 품질 개선 0점`) stuffed with decorative corner icons and secondary sub-captions that merely report idle zeros.
+2. **Permanent All-Zero Error / Quarantine Strips ("Silence When Healthy")**: Dedicated 3-column counter boxes showing `격리 0 | 수집 오류 0 | 개편 오류 0` when nothing is wrong.
+   - **Mandatory Rule**: When healthy (`count === 0`), **hide error/quarantine blocks completely** (0 visual noise). Surface a **single concise, actionable alert** (`수집 오류 2건 확인하기`) ONLY when `count > 0`.
+3. **Screaming Danger Red / Amber on `0`**: Never style `0` in red (`#C83242` / `#FF7187`) or warning amber! Red signals an active problem right now — coloring `0` red creates instant false-alarm fatigue.
+4. **Leaked Developer / Backend Plumbing Telemetry**: Exposing internal worker metrics (`열린 브라우저 탭 0개`, `전송 대기 알림 0건`, `브라우저 정상`, `0.0 req/s`) to end users. Keep user screens focused strictly on user work outcomes; hide diagnostics unless explicitly requested.
+
+---
+
+## 0.B Mandatory Two-Pass Protocol: 70% LLM Copy Purge & Structural Re-Layout
 
 Grounded in **Nielsen Norman Group** (*users read only 20%–28% of words on a web page*), **Steve Krug** (*"Get rid of half the words on each page, then get rid of half of what's left"* = **75% cut**), and LLM verbosity bias studies (LLMs compulsively over-explain, pad cards symmetrically, and stack redundant sections):
 
@@ -97,8 +115,9 @@ Reject every item below unless explicitly requested by the user:
 7. **Redundant text on self-evident icon buttons** — Never put `닫기`/`복사`/`새로고침` beside universal icons.
 8. **Claustrophobic scroll-locked traps AND bloated multi-rail chrome** — Never trap landing/form/editorial/docs pages inside cramped `h-[100dvh] overflow-hidden` boxes; embrace spacious natural scrolling (`min-h-[100dvh]`) with One Thing per Section + Peek Effect, and reserve `lg:h-[100dvh]` split-pane shells strictly for live multi-pane tools.
 9. **Nested cards, card walls, un-relayed hollow containers & 3-up feature card grids (`lg:grid-cols-3`)** — Never leave half-empty card boxes after cutting copy; dissolve them into airy open lists (`toss.tech` style), hairline `divide-y`/`divide-x` rows, or spacious 2-column layouts.
-10. **LLM verbosity bloat ("happy talk", greetings, obvious click instructions, eyebrow kickers, `01/02/03` ordinals)** — Purge ~70% of non-essential text first, then re-layout the page around the essential ~30%.
-11. **Gradients, glows, pulsing halos (`animate-ping`), hype badges, pastel icon tiles, `Sparkles`, emojis, `line-through`, `transition-all`, hover lift on static cards, `Inter`/`Roboto`/`Space Grotesk` defaults**.
+10. **Speculative dashboard KPI strips, permanent all-zero error boxes, red-colored `0`s & leaked developer telemetry** — Apply the `>50%` Necessity Gate (Manga-Panel Rule) and Silence When Healthy: omit idle KPI bars (`초당 처리량 0.0`, `열린 탭 0개`) and permanent `격리 0 | 오류 0` counter rows completely; show a single actionable alert only when `count > 0`.
+11. **LLM verbosity bloat ("happy talk", greetings, obvious click instructions, eyebrow kickers, `01/02/03` ordinals)** — Purge ~70% of non-essential text first, then re-layout the page around the essential ~30%.
+12. **Gradients, glows, pulsing halos (`animate-ping`), hype badges, pastel icon tiles, `Sparkles`, emojis, `line-through`, `transition-all`, hover lift on static cards, `Inter`/`Roboto`/`Space Grotesk` defaults**.
 
 ---
 
