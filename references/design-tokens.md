@@ -1,35 +1,142 @@
-# Design Sheet: OKLCH Shadowless Blue-White, Single Focus Ring, Concentric Squircles & Optical CSS
+# Design Sheet: Dual-Theme OKLCH (Light Blue-White & Toss Cool-Dark), Single Focus Ring, Squircles, CSS Shield & Custom Controls
 
-## 1. Perceptually Uniform OKLCH 4-Level Blue-White Color System
+## 1. Perceptually Uniform Dual-Theme OKLCH Color System
 
-Inspired by Toss TDS's OKLCH color system overhaul: keep Hue (`~252`) and subtle Chroma consistent while stepping Lightness (`L`) cleanly so shadowless surfaces stay distinguishable even on low-contrast office monitors and aging eyes. Zero `#FFFFFF`/`bg-white` backgrounds, zero `#000000`/`bg-black`/`text-black`, zero drop/elevation shadows.
+Synthesizes Toss TDS's OKLCH overhaul and live production tokens audited directly from `tossinvest.com` (`--wts-adaptive-*` / `--tw-adaptive-color-*`), `tossbank.com`, `toss.tech`, and `tosspayments.com`.
+- **Light Mode (Signature Blue-White)**: Zero `#FFFFFF` glare and zero `#000000` harshness — crisp cool blue-white 4-level elevation (`#E8EFFA` / `#F1F5FB` / `#F9FBFF` / `#ECF2FA`).
+- **Dark Mode (Authentic Toss Elevated Cool-Dark)**: Zero `#000000` pure black (prevents OLED smearing & eye halation) and zero `#FFFFFF` large text blocks — authentic Toss WTS charcoal-navy 4-level elevation (`#101013` / `#17171C` / `#202027` / `#2C2C35`) paired with translucent blue-tinted overlays (`rgba(217, 217, 255, 0.11)`).
+- **Rule**: Always consume semantic CSS variables (`var(--surface-elevated)`, `var(--text-primary)`, etc.) in components so Light and Dark modes stay 100% synchronized without brittle duplicate `dark:` hex overrides.
 
-| Semantic Token | Hex Fallback | OKLCH Equivalent | WCAG Contrast / Role |
+### Semantic Token Pairing Table (Light / Dark)
+
+| Semantic Token | Light Blue-White (Hex / OKLCH) | Toss Cool-Dark (Hex / OKLCH) | Role & WCAG Contrast |
 | :--- | :--- | :--- | :--- |
-| `--surface-recessed` (`--bg-section-alt`) | `#E8EFFA` | `oklch(0.948 0.016 254)` | Level 0: Alternating sections, segmented control tracks |
-| `--surface-canvas` (`--bg-canvas`) | `#F1F5FB` | `oklch(0.968 0.011 252)` | Level 1: Primary canvas (`html, body`, `theme-color`) |
-| `--surface-elevated` (`--bg-surface`) | `#F9FBFF` | `oklch(0.988 0.006 252)` | Level 2: Funnel card, workspace panel, active tab, modal/sheet |
-| `--surface-field` (`--bg-input`) | `#ECF2FA` | `oklch(0.957 0.013 253)` | Level 3: Borderless TDS filled inputs, unselected rows, neutral badges |
-| `--border-hairline` (`--border-surface`) | `rgba(49, 130, 246, 0.10)` | `oklch(0.61 0.19 255 / 0.10)` | `1px solid` on Level 2 surfaces & `divide-y`/`divide-x` rules |
-| `--color-primary` | `#3182F6` | `oklch(0.608 0.194 256)` | System signal ONLY: primary CTA, active state, single focus ring, key metric |
-| `--color-primary-hover` | `#1B64DA` | `oklch(0.525 0.195 258)` | Primary CTA hover, selected text, gentle error notice ink (`5.1:1+`) |
-| `--color-primary-active` | `#1957C2` | `oklch(0.478 0.184 259)` | Primary CTA pressed state |
-| `--color-primary-soft` | `#E2EEFF` | `oklch(0.935 0.028 254)` | Selected chip fill, highlight badges, secondary CTA fill |
-| `--color-on-primary` | `#F9FBFF` | `oklch(0.988 0.006 252)` | Ink on `#3182F6` buttons (avoids raw `#FFFFFF`) |
-| `--text-primary` | `#191F28` | `oklch(0.238 0.016 255)` | Primary ink (`14.8:1` on canvas) |
-| `--text-secondary` | `#4E5968` | `oklch(0.456 0.022 255)` | Secondary ink (`6.7:1` on canvas) |
-| `--text-muted` | `#64707D` | `oklch(0.542 0.020 252)` | WCAG AA safe muted ink (`4.6:1+` on `#F1F5FB` & `#F9FBFF`; replaces `#8B95A1` which fails AA at `2.8:1`) |
-| `--status-success-fg` / `bg` | `#158453` / `#E6F6EE` | `oklch(0.535 0.130 156)` | Pair with `CheckCircle2` icon + text (WCAG 1.4.1 color-blind safe) |
-| `--status-danger-fg` / `bg` | `#C83242` / `#FDEEEF` | `oklch(0.515 0.185 18)` | Data-driven alert/negative metric badges only (pair with icon + text) |
+| `--surface-recessed` | `#E8EFFA` / `oklch(0.948 0.016 254)` | `#101013` / `oklch(0.174 0.006 286)` | Level 0: Recessed canvas, segmented tracks, alternating bands (`greyBackground`) |
+| `--surface-canvas` | `#F1F5FB` / `oklch(0.968 0.011 252)` | `#17171C` / `oklch(0.208 0.009 285)` | Level 1: Primary page canvas (`html, body`, `theme-color`) |
+| `--surface-elevated` | `#F9FBFF` / `oklch(0.988 0.006 252)` | `#202027` / `oklch(0.247 0.013 285)` | Level 2: Cards, panels, active tabs, dropdowns, modals (`layeredBackground`) |
+| `--surface-field` | `#ECF2FA` / `oklch(0.957 0.013 253)` | `#2C2C35` / `oklch(0.296 0.015 285)` | Level 3: Borderless TDS inputs, floating surfaces, neutral badges (`floatBackground`) |
+| `--surface-tint-subtle` | `rgba(2, 32, 71, 0.045)` | `rgba(209, 209, 253, 0.06)` | Adaptive translucent chip/hover fill (works on any surface level) |
+| `--surface-tint-hover` | `rgba(2, 32, 71, 0.08)` | `rgba(217, 217, 255, 0.11)` | Adaptive interactive hover / search pill surface (`greyOpacity100`) |
+| `--border-hairline` | `rgba(0, 27, 55, 0.10)` | `rgba(222, 222, 255, 0.14)` | `1px` crisp surface divider (`divide-y`, panel hairline, inset ring) |
+| `--border-strong` | `rgba(0, 29, 58, 0.18)` | `rgba(222, 222, 255, 0.22)` | Unchecked checkbox hairline, interactive outline hover |
+| `--color-primary` | `#3182F6` / `oklch(0.608 0.194 256)` | `#3485FA` / `oklch(0.622 0.194 257)` | Primary CTA fill, active checkbox/switch, key signal |
+| `--color-primary-hover` | `#1B64DA` / `oklch(0.525 0.195 258)` | `#449BFF` / `oklch(0.680 0.178 255)` | Primary CTA hover |
+| `--color-primary-active` | `#1957C2` / `oklch(0.478 0.184 259)` | `#2970D9` / `oklch(0.562 0.186 258)` | Primary CTA pressed |
+| `--color-primary-text` | `#1B64DA` | `#61B0FF` | Blue text/links/gentle guidance (`>= 5.1:1` light, `>= 7.2:1` on `#17171C`/`#202027` dark!) |
+| `--color-focus-ring` | `#3182F6` | `#449BFF` | Single focus ring (high visibility on both canvases) |
+| `--color-primary-soft` | `#E2EEFF` | `#202C4D` | Soft secondary CTA fill, selected chip/option fill, highlight badge |
+| `--color-on-primary` | `#F9FBFF` | `#F4F7FC` | Crisp off-white ink on `#3182F6`/`#3485FA` buttons |
+| `--text-primary` | `#191F28` (`14.8:1`) | `#F2F4F8` (`14.2:1` on `#17171C`) | Primary ink (avoids pure `#000000` and pure `#FFFFFF` glare) |
+| `--text-secondary` | `#4E5968` (`6.7:1`) | `#C3C3C6` (`9.6:1` on `#17171C`) | Secondary body ink |
+| `--text-muted` | `#64707D` (`4.6:1+`) | `#9E9EA4` (`5.3:1+` on `#202027`) | WCAG AA safe muted ink (replaces `#8B95A1` in light & `#62626D` in dark) |
+| `--status-success-fg` / `bg` | `#158453` / `#E6F6EE` | `#57C28D` / `rgba(21, 196, 126, 0.14)` | Pair with `CheckCircle2` icon + text (WCAG 1.4.1) |
+| `--status-danger-fg` / `bg` | `#C83242` / `#FDEEEF` | `#FF7187` / `rgba(223, 58, 69, 0.16)` | Data alerts / negative metrics (pair with icon + text) |
+| `--backdrop-dimmer` | `rgba(15, 23, 42, 0.36)` | `rgba(4, 6, 12, 0.68)` | Modal / BottomSheet dimmer overlay |
+
+### Toss Signature Dual-CTA Pairing (Observed on `tosspayments.com` & `tossplace.com`)
+When pairing a primary and secondary action side by side, prefer **Toss Solid Primary + Soft Tinted Secondary** (instead of noisy outlined ghost buttons):
+- **Primary**: `bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-on-primary)]`
+- **Soft Secondary**: `bg-[var(--color-primary-soft)] text-[var(--color-primary-text)]` (or neutral `bg-[var(--surface-tint-hover)] text-[var(--text-primary)]`)
+
+### Shadowless Depth Rule (0-Blur Inset Hairlines Permitted)
+- **Forbidden**: Drop shadows (`box-shadow: 0 4px 12px ...`), `drop-shadow`, `text-shadow`, `shadow-sm/md/lg/xl`.
+- **Allowed**: Zero-blur `1px–2px` `inset` borders (`box-shadow: inset 0 0 0 1px var(--border-hairline)` or Tailwind `ring-1 ring-inset` / `focus:ring-2 focus:ring-inset`) — directly matching Toss WTS & Toss Payments production buttons without shifting box width — plus the `0 0 0 1000px ... inset` autofill mask.
 
 ---
 
-## 2. Single Focus Ring Rule (Zero Double Borders)
+## 2. Mandatory Base CSS: Dual-Theme Variables, Single Focus Ring & Browser Chrome Shield (`src/index.css`)
 
-**Root Cause**: Unguarded global `:focus-visible { outline: 2px solid #3182F6; outline-offset: 2px; }` combined with `focus:ring-2 focus:ring-inset` draws TWO concentric blue lines around `<input>` elements.
-
-### Mandatory Base CSS (`src/index.css`)
 ```css
+:root {
+  color-scheme: light;
+  --surface-recessed: #E8EFFA;
+  --surface-canvas: #F1F5FB;
+  --surface-elevated: #F9FBFF;
+  --surface-field: #ECF2FA;
+  --surface-tint-subtle: rgba(2, 32, 71, 0.045);
+  --surface-tint-hover: rgba(2, 32, 71, 0.08);
+  --border-hairline: rgba(0, 27, 55, 0.10);
+  --border-strong: rgba(0, 29, 58, 0.18);
+  --color-primary: #3182F6;
+  --color-primary-hover: #1B64DA;
+  --color-primary-active: #1957C2;
+  --color-primary-text: #1B64DA;
+  --color-focus-ring: #3182F6;
+  --color-primary-soft: #E2EEFF;
+  --color-on-primary: #F9FBFF;
+  --text-primary: #191F28;
+  --text-secondary: #4E5968;
+  --text-muted: #64707D;
+  --status-success-fg: #158453;
+  --status-success-bg: #E6F6EE;
+  --status-danger-fg: #C83242;
+  --status-danger-bg: #FDEEEF;
+  --backdrop-dimmer: rgba(15, 23, 42, 0.36);
+  --scrollbar-thumb: rgba(49, 130, 246, 0.22);
+  --scrollbar-thumb-hover: rgba(49, 130, 246, 0.38);
+}
+
+[data-theme="dark"],
+.dark {
+  color-scheme: dark;
+  --surface-recessed: #101013;
+  --surface-canvas: #17171C;
+  --surface-elevated: #202027;
+  --surface-field: #2C2C35;
+  --surface-tint-subtle: rgba(209, 209, 253, 0.06);
+  --surface-tint-hover: rgba(217, 217, 255, 0.11);
+  --border-hairline: rgba(222, 222, 255, 0.14);
+  --border-strong: rgba(222, 222, 255, 0.24);
+  --color-primary: #3485FA;
+  --color-primary-hover: #449BFF;
+  --color-primary-active: #2970D9;
+  --color-primary-text: #61B0FF;
+  --color-focus-ring: #449BFF;
+  --color-primary-soft: #202C4D;
+  --color-on-primary: #F4F7FC;
+  --text-primary: #F2F4F8;
+  --text-secondary: #C3C3C6;
+  --text-muted: #9E9EA4;
+  --status-success-fg: #57C28D;
+  --status-success-bg: rgba(21, 196, 126, 0.14);
+  --status-danger-fg: #FF7187;
+  --status-danger-bg: rgba(223, 58, 69, 0.16);
+  --backdrop-dimmer: rgba(4, 6, 12, 0.68);
+  --scrollbar-thumb: rgba(217, 217, 255, 0.20);
+  --scrollbar-thumb-hover: rgba(217, 217, 255, 0.34);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-recessed: #101013;
+    --surface-canvas: #17171C;
+    --surface-elevated: #202027;
+    --surface-field: #2C2C35;
+    --surface-tint-subtle: rgba(209, 209, 253, 0.06);
+    --surface-tint-hover: rgba(217, 217, 255, 0.11);
+    --border-hairline: rgba(222, 222, 255, 0.14);
+    --border-strong: rgba(222, 222, 255, 0.24);
+    --color-primary: #3485FA;
+    --color-primary-hover: #449BFF;
+    --color-primary-active: #2970D9;
+    --color-primary-text: #61B0FF;
+    --color-focus-ring: #449BFF;
+    --color-primary-soft: #202C4D;
+    --color-on-primary: #F4F7FC;
+    --text-primary: #F2F4F8;
+    --text-secondary: #C3C3C6;
+    --text-muted: #9E9EA4;
+    --status-success-fg: #57C28D;
+    --status-success-bg: rgba(21, 196, 126, 0.14);
+    --status-danger-fg: #FF7187;
+    --status-danger-bg: rgba(223, 58, 69, 0.16);
+    --backdrop-dimmer: rgba(4, 6, 12, 0.68);
+    --scrollbar-thumb: rgba(217, 217, 255, 0.20);
+    --scrollbar-thumb-hover: rgba(217, 217, 255, 0.34);
+  }
+}
+
 @layer base {
   html, body {
     overflow-x: clip;
@@ -44,16 +151,12 @@ Inspired by Toss TDS's OKLCH color system overhaul: keep Hue (`~252`) and subtle
     scroll-behavior: smooth;
   }
 
-  @media (pointer: fine) {
-    html { overscroll-behavior: none; }
-  }
-
   h1, h2 { text-wrap: balance; }
   button, a, [role="button"], input { touch-action: manipulation; }
   input, textarea, select { font-size: 16px; }
 
   :where(a, button, [role="button"], [tabindex]):focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--color-focus-ring);
     outline-offset: 2px;
   }
 
@@ -65,7 +168,7 @@ Inspired by Toss TDS's OKLCH color system overhaul: keep Hue (`~252`) and subtle
   * {
     -webkit-tap-highlight-color: transparent;
     scrollbar-width: thin;
-    scrollbar-color: rgba(49, 130, 246, 0.22) transparent;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
   }
 
   ::selection {
@@ -129,44 +232,56 @@ Inspired by Toss TDS's OKLCH color system overhaul: keep Hue (`~252`) and subtle
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: rgba(49, 130, 246, 0.22);
+    background-color: var(--scrollbar-thumb);
     border-radius: 9999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(49, 130, 246, 0.38);
+    background-color: var(--scrollbar-thumb-hover);
   }
 }
 ```
 
-### TDS Filled Input Contract
-- **Idle**: `bg-[#ECF2FA] rounded-[12px] sm:rounded-[14px] border-0 min-h-[56px] sm:min-h-[58px] text-[18px] sm:text-[20px]`
-- **Focus**: `focus:outline-none focus-visible:outline-none focus:bg-[#F9FBFF] focus:ring-2 focus:ring-inset focus:ring-[#3182F6]`
-- **Gentle Error**: `bg-[#E2EEFF] ring-2 ring-inset ring-[#3182F6]` + `15px` `#1B64DA` guidance text below
+### FOUC-Free Theme Initialization (`index.html` `<head>`)
+```html
+<script>
+  (function () {
+    var saved = localStorage.getItem('theme');
+    var theme = saved === 'dark' || saved === 'light'
+      ? saved
+      : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  })();
+</script>
+```
+
+### TDS Filled Input Contract (Dual-Theme Single Focus Ring)
+- **Idle**: `bg-[var(--surface-field)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] rounded-[12px] sm:rounded-[14px] border-0 min-h-[54px] sm:min-h-[58px] text-[16px] sm:text-[18px]`
+- **Focus**: `focus:outline-none focus-visible:outline-none focus:bg-[var(--surface-elevated)] focus:ring-2 focus:ring-inset focus:ring-[var(--color-focus-ring)]`
+- **Gentle Error**: `bg-[var(--color-primary-soft)] ring-2 ring-inset ring-[var(--color-focus-ring)]` + `15px` `text-[var(--color-primary-text)]` guidance below
 - **Never** stack `focus:border-*` + `focus:ring-*` on the same element.
 
 ---
 
 ## 3. Balanced Concentric Squircle Radii (Goldilocks Curve)
 
-Avoid BOTH extremes: harsh boxy `0px–4px` corners AND bloated `>= 26px` / rectangular `rounded-full` balloons. Always enforce concentricity:
+Avoid BOTH extremes: harsh boxy `0px–4px` corners on cards/controls AND bloated `>= 26px` / rectangular `rounded-full` balloons. Enforce concentricity:
 $$\text{innerRadius} = \max(0,\; \text{outerRadius} - \text{padding})$$
 
 | Pattern | Outer | Padding (`P`) | Inner | Note |
 | :--- | :--- | :--- | :--- | :--- |
+| Custom React checkbox box | `rounded-[7px]` | — | `14px` crisp `Check` icon | Balanced curve (never `3px` OS box) |
 | Data badge / compact icon button | `rounded-[8px]` | — | — | Tidy, never sharp |
 | Standard button / input / list row | `rounded-[12px]`–`rounded-[14px]` | — | — | Refined Toss curve |
 | Segmented tab bar (default) | `rounded-[16px]` | `p-1` (`4px`) | `rounded-[12px]` | `16 - 4 = 12px` exact sync |
 | Segmented tab bar (roomy) | `rounded-[18px]` | `p-1.5` (`6px`) | `rounded-[12px]` | `18 - 6 = 12px` exact sync |
-| Card / panel + inset box | `rounded-[20px]` | `p-2` (`8px`) | `rounded-[12px]` | `20 - 8 = 12px` exact sync |
 | TossSelect dropdown panel | `rounded-[18px]` | `p-1.5` (`6px`) | `rounded-[12px]` option row | `18 - 6 = 12px` exact sync |
-| Custom React checkbox box | `rounded-[7px]` | — | `14px` crisp `Check` icon | Soft balanced square (never `3px` OS box) |
+| Card / panel + inset box | `rounded-[20px]` | `p-2` (`8px`) | `rounded-[12px]` | `20 - 8 = 12px` exact sync |
 | Card / modal / mobile sheet | `rounded-[18px]`–`rounded-[20px]` | `p-5` / `p-6` | Controls `rounded-[12px]`–`rounded-[14px]` | Balanced softness |
-| True 1:1 circles ONLY (avatars, status dot) | `rounded-full` | — | — | Never on rectangular boxes |
+| True 1:1 circles ONLY (avatars, switch thumb, radio) | `rounded-full` | — | — | Never on rectangular boxes |
 
 ### Progressive CSS Squircle Enhancement (Chrome/Edge 139+)
-Standard circular `border-radius` has a subtle tangent pinch where straight line meets arc. Progressively enhance surfaces with continuous curvature while keeping balanced fallback radii for Safari/Firefox:
-
 ```css
 .toss-squircle {
   border-radius: 20px;
@@ -177,14 +292,12 @@ Standard circular `border-radius` has a subtle tangent pinch where straight line
   }
 }
 ```
-*Optical note*: Squircles add slightly more visual corner mass — give icon buttons `2px` generous inner padding so glyphs never feel cramped.
 
 ---
 
 ## 4. Modern Optical CSS Baseline Craft
 
 ### A. Optical Vertical Centering (`text-box-trim`, MDN Baseline)
-Eliminates Hangul/Latin ascender-descender vertical float inside compact badges and single-line buttons:
 ```css
 @supports (text-box: trim-both cap alphabetic) {
   .optical-text {
@@ -194,10 +307,9 @@ Eliminates Hangul/Latin ascender-descender vertical float inside compact badges 
 ```
 
 ### B. Zero Horizontal Scrollbar Jump (`scrollbar-gutter: stable`)
-Apply to bounded inner scroll regions (`overflow-y-auto`) and centered modals (`scrollbar-gutter: stable both-edges`) so appearing scrollbars never jerk layouts sideways by ~15px.
+Apply to bounded inner scroll panes (`overflow-y-auto`) and centered modals (`scrollbar-gutter: stable both-edges`) so appearing scrollbars never jerk layouts sideways by ~15px.
 
 ### C. Touch-Safe Hover Gating (Eliminating Mobile Sticky Hover)
-Never trigger hover color/lift states on touch taps — wrap decorative hover polish inside pointer capability queries:
 ```css
 @media (hover: hover) and (pointer: fine) {
   .row-actions { opacity: 0; }
@@ -213,7 +325,6 @@ Never trigger hover color/lift states on touch taps — wrap decorative hover po
   content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
 />
 ```
-Ensures virtual keyboards resize the layout viewport cleanly so bottom action bars never sink behind the keyboard.
 
 ---
 
@@ -223,12 +334,12 @@ Pretendard is pre-tuned for Hangul + Latin rhythm — **do NOT over-tighten lett
 
 | Role | Size | Unitless `line-height` | Weight | `letter-spacing` |
 | :--- | :--- | :--- | :--- | :--- |
-| Display / Hero H1 | `clamp(1.9rem, 4.5vw, 3.125rem)` (`30.4px`–`50px`) | `1.28` | `800` | `-0.02em` |
+| Display / Hero H1 | `clamp(1.9rem, 4.5vw, 3.25rem)` (`30.4px`–`52px`) | `1.28` | `800` | `-0.02em` |
 | Section / View H2 | `clamp(1.6rem, 3vw, 2.25rem)` (`26px`–`36px`) | `1.28` | `800` | `-0.015em` |
 | Card / Funnel Title H3 | `20px`–`24px` | `1.35` | `700`–`800` | `-0.01em` |
 | Subtitle / Lead Body | `17px`–`20px` | `1.55` | `500` | `0` (`tracking-normal`) |
-| Body / Labels / Options | `16px`–`18px` | `1.5`–`1.6` | `500`–`700` | `0` |
-| Data Badges / Captions | `14px`–`15px` (strict floor `>= 14px`) | `1.4` | `500`–`600` | `0` |
+| Body / Labels / Options | `15px`–`18px` | `1.5`–`1.6` | `500`–`700` | `0` |
+| Data Badges / Captions | `14px`–`15px` (consumer floor `>= 14px`; `13px tabular-nums` permitted ONLY in dense pro-data/trading table sub-cells) | `1.4` | `500`–`600` | `0` |
 | All Numbers / Metrics | `tabular-nums` | — | — | `0` |
 
 ---
@@ -236,29 +347,28 @@ Pretendard is pre-tuned for Hangul + Latin rhythm — **do NOT over-tighten lett
 ## 6. Icon-Only Controls & Multi-Channel Data Badges
 
 ### A. NN/g Icon-Only Decision Matrix + WCAG 2.2 (SC 2.5.8)
-- **Icon-only (no redundant label)** strictly for the 12 universal icons: `X`, `Copy`, `RotateCw`/`RefreshCw`, `Trash2`, `Search`, `Download`, `ExternalLink`, `ArrowLeft`, `ChevronLeft/Right`, `Settings`, `Pause/Play`, `MoreHorizontal`.
+- **Icon-only (no redundant label)** strictly for universal actions: `X`, `Copy`, `RotateCw`/`RefreshCw`, `Trash2`, `Search`, `Download`, `ExternalLink`, `ArrowLeft`, `ChevronLeft/Right`, `Settings`, `Pause/Play`, `MoreHorizontal`, and `Sun/Moon` (theme toggle, modeled after `tossinvest.com`).
 - **Keep short 2–3 word label** for domain-specific or ambiguous actions (`전후 비교`, `내 지원금 확인하기`) because hover tooltips fail on touchscreens.
 - **Hit Box & Spacing**: Icon `18px–20px` (`strokeWidth={2}`), clickable target `>= 40×40px` desktop / `>= 44–48px` mobile (`>= 56px` for senior primary actions), minimum `8px` (`gap-2`) between adjacent buttons.
-- **Mandatory `aria-label`** on every icon-only button; desktop toolbars use **instant-subsequent tooltips** (`300ms` delay on first hover, `0ms` when sliding to an adjacent icon button).
+- **Mandatory `aria-label`** on every icon-only button; desktop toolbars use **instant-subsequent tooltips** (`300ms` first hover, `0ms` adjacent).
 
-### B. Multi-Channel Functional Metadata Badges (Replacing `·` / `—` Chains)
-Combine **surface tint + explicit label (and semantic icon when showing status)** so color-blind users never rely on color alone (WCAG 1.4.1):
+### B. Multi-Channel Functional Metadata Badges (Dual-Theme, Replacing `·` / `—` Chains)
 ```tsx
 <div className="flex flex-wrap items-center justify-between gap-2">
   <div className="flex flex-wrap items-center gap-1.5">
-    <span className="optical-text rounded-[8px] bg-[#ECF2FA] px-2.5 py-1 text-[14px] font-semibold text-[#4E5968]">
+    <span className="optical-text rounded-[8px] bg-[var(--surface-field)] px-2.5 py-1 text-[14px] font-semibold text-[var(--text-secondary)]">
       직접 입력
     </span>
-    <span className="optical-text inline-flex items-center gap-1 rounded-[8px] bg-[#E6F6EE] px-2.5 py-1 text-[14px] font-bold text-[#158453] tabular-nums">
+    <span className="optical-text inline-flex items-center gap-1 rounded-[8px] bg-[var(--status-success-bg)] px-2.5 py-1 text-[14px] font-bold text-[var(--status-success-fg)] tabular-nums">
       <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5" strokeWidth={2} />
       52점 → 0점 (-52)
     </span>
   </div>
   <div className="flex flex-wrap items-center gap-1.5">
-    <span className="optical-text rounded-[8px] bg-[#ECF2FA] px-2.5 py-1 text-[14px] font-semibold text-[#4E5968] tabular-nums">
+    <span className="optical-text rounded-[8px] bg-[var(--surface-field)] px-2.5 py-1 text-[14px] font-semibold text-[var(--text-secondary)] tabular-nums">
       대비 7.5
     </span>
-    <span className="optical-text rounded-[8px] bg-[#E2EEFF] px-2.5 py-1 text-[14px] font-semibold text-[#1B64DA] tabular-nums">
+    <span className="optical-text rounded-[8px] bg-[var(--color-primary-soft)] px-2.5 py-1 text-[14px] font-semibold text-[var(--color-primary-text)] tabular-nums">
       수정 1회
     </span>
   </div>
@@ -267,24 +377,13 @@ Combine **surface tint + explicit label (and semantic icon when showing status)*
 
 ---
 
-## 7. Custom React Form Controls (Zero Native Browser Checkbox / `<select>`)
+## 7. Zero Native Browser UI Leaks: Complete Custom React Replacement Matrix
 
-Never render raw OS/browser `<input type="checkbox">`, `<input type="radio">`, or `<select>` elements — they inject pure `#FFFFFF` fills, harsh `#767676` borders, `3px` jagged corners, and inconsistent OS dropdown popups that shatter the Toss blue-white aesthetic.
+Never render raw OS/browser `<input type="checkbox">`, `<input type="radio">`, `<select>`, or other system widgets — they inject pure `#FFFFFF` fills, harsh `#767676` borders, `3px` jagged corners, and inconsistent OS popups that shatter both Light and Dark themes.
 
-### A. Clean React Checkbox (`TossCheckbox`)
-Keep full native keyboard/form semantics using an `sr-only` `<input type="checkbox" />` (or `role="checkbox"` button) wrapped inside a generous clickable row (`min-h-[44px]` desktop / `min-h-[52px]` senior rows):
-
-| State | Visual Surface (`22px × 22px`, `rounded-[7px]`) | Icon / Focus |
-| :--- | :--- | :--- |
-| **Unchecked** | `bg-[#F9FBFF] ring-1 ring-inset ring-[rgba(49,130,246,0.24)]` | Empty; fine-pointer hover strengthens ring to `rgba(49,130,246,0.48)` |
-| **Checked** | `bg-[#3182F6] ring-0` | Crisp `#F9FBFF` Lucide `Check` (`h-3.5 w-3.5`, `strokeWidth={3}`), `120ms` opacity/scale reveal |
-| **Indeterminate** | `bg-[#3182F6] ring-0` | Crisp `#F9FBFF` Lucide `Minus` (`h-3.5 w-3.5`, `strokeWidth={3}`), `aria-checked="mixed"` |
-| **Keyboard Focus** | Single ring via `peer-focus-visible:ring-2 peer-focus-visible:ring-[#3182F6] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#ECF2FA]` | Strictly 1 ring, zero double borders |
-| **Gentle Error** | `bg-[#E2EEFF] ring-2 ring-inset ring-[#3182F6]` | Paired with `15px` `#1B64DA` guidance text below |
-| **Disabled** | `bg-[#ECF2FA] opacity-50 cursor-not-allowed` | Non-interactive |
-
+### A. Clean Dual-Theme React Checkbox (`TossCheckbox`)
 ```tsx
-<label className="group flex min-h-[48px] cursor-pointer items-center gap-3 rounded-[14px] bg-[#ECF2FA] px-4 py-3 select-none">
+<label className="group flex min-h-[48px] cursor-pointer items-center gap-3 rounded-[14px] bg-[var(--surface-field)] px-4 py-3 select-none">
   <input
     type="checkbox"
     checked={checked}
@@ -293,30 +392,19 @@ Keep full native keyboard/form semantics using an `sr-only` `<input type="checkb
   />
   <span
     aria-hidden="true"
-    className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[7px] transition-colors duration-150 peer-focus-visible:ring-2 peer-focus-visible:ring-[#3182F6] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#ECF2FA] ${
+    className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[7px] transition-colors duration-150 peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--color-focus-ring)] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[var(--surface-field)] ${
       checked
-        ? 'bg-[#3182F6] text-[#F9FBFF]'
-        : 'bg-[#F9FBFF] ring-1 ring-inset ring-[rgba(49,130,246,0.24)] group-hover:ring-[rgba(49,130,246,0.48)]'
+        ? 'bg-[var(--color-primary)] text-[var(--color-on-primary)]'
+        : 'bg-[var(--surface-elevated)] ring-1 ring-inset ring-[var(--border-strong)] group-hover:ring-[var(--color-focus-ring)]'
     }`}
   >
     {checked && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
   </span>
-  <span className="text-[16px] font-medium text-[#191F28]">{label}</span>
+  <span className="text-[16px] font-medium text-[var(--text-primary)]">{label}</span>
 </label>
 ```
 
-### B. Toss-Style Custom Dropdown (`TossSelect`)
-Replace every native `<select>` with a shadowless Toss-style combobox trigger + concentric floating listbox (desktop) or Select BottomSheet (mobile when 5+ options):
-
-| Part | Exact Shadowless Toss Spec |
-| :--- | :--- |
-| **Trigger Button** | `role="combobox"`, `aria-haspopup="listbox"`, `aria-expanded={open}`, `min-h-[52px] sm:min-h-[56px] w-full rounded-[12px] sm:rounded-[14px] bg-[#ECF2FA] px-4 flex items-center justify-between gap-2 text-[16px] font-medium` (placeholder `#64707D`, selected `#191F28`) |
-| **Trigger Open / Focus** | `bg-[#F9FBFF] ring-2 ring-inset ring-[#3182F6] focus:outline-none focus-visible:outline-none` (ONE ring only); right `ChevronDown` (`h-5 w-5 text-[#64707D]`) rotates `180deg` in `150ms` |
-| **Desktop Menu Panel** | Shadowless `rounded-[18px] p-1.5 bg-[#F9FBFF] border border-[rgba(49,130,246,0.16)] max-h-[280px] overflow-y-auto overscroll-contain` + `scrollbar-gutter: stable` (zero `shadow-*`!) |
-| **Option Item** | `role="option"`, `aria-selected={selected}`, `min-h-[44px] w-full rounded-[12px] px-3.5 py-2.5 flex items-center justify-between gap-3 text-left text-[16px]` (`18 - 6 = 12px` concentric sync!) |
-| **Option States** | Idle `text-[#191F28]`; Hover / Keyboard Active `bg-[#ECF2FA]`; Selected `bg-[#E2EEFF] text-[#1B64DA] font-bold` + right-aligned `Check` (`h-[18px] w-[18px] text-[#3182F6] shrink-0`, `strokeWidth={2.5}`) |
-| **Mobile (`< 640px`, 5+ options)** | Render the same option rows inside a Toss Select BottomSheet (`rounded-t-[20px] bg-[#F9FBFF]`, `Menu.Header` title + icon-only `X` button, dimmer click closes, `pb-[env(safe-area-inset-bottom)]`) |
-
+### B. Toss-Style Dual-Theme Custom Dropdown (`TossSelect`)
 ```tsx
 <div className="relative">
   <button
@@ -328,16 +416,16 @@ Replace every native `<select>` with a shadowless Toss-style combobox trigger + 
     onClick={() => setOpen((prev) => !prev)}
     className={`flex min-h-[54px] w-full items-center justify-between gap-2 rounded-[14px] px-4 text-left text-[16px] font-medium transition-colors duration-150 focus:outline-none focus-visible:outline-none ${
       open
-        ? 'bg-[#F9FBFF] ring-2 ring-inset ring-[#3182F6]'
-        : 'bg-[#ECF2FA] focus-visible:bg-[#F9FBFF] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#3182F6]'
+        ? 'bg-[var(--surface-elevated)] ring-2 ring-inset ring-[var(--color-focus-ring)]'
+        : 'bg-[var(--surface-field)] focus-visible:bg-[var(--surface-elevated)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-focus-ring)]'
     }`}
   >
-    <span className={selectedOption ? 'text-[#191F28]' : 'text-[#64707D]'}>
+    <span className={selectedOption ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}>
       {selectedOption ? selectedOption.label : placeholder}
     </span>
     <ChevronDown
       aria-hidden="true"
-      className={`h-5 w-5 shrink-0 text-[#64707D] transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+      className={`h-5 w-5 shrink-0 text-[var(--text-muted)] transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
       strokeWidth={2}
     />
   </button>
@@ -345,7 +433,7 @@ Replace every native `<select>` with a shadowless Toss-style combobox trigger + 
     <ul
       id={listboxId}
       role="listbox"
-      className="absolute z-40 mt-2 max-h-[280px] w-full overflow-y-auto overscroll-contain rounded-[18px] border border-[rgba(49,130,246,0.16)] bg-[#F9FBFF] p-1.5 [scrollbar-gutter:stable]"
+      className="absolute z-40 mt-2 max-h-[280px] w-full overflow-y-auto overscroll-contain rounded-[18px] border border-[var(--border-hairline)] bg-[var(--surface-elevated)] p-1.5 [scrollbar-gutter:stable]"
     >
       {options.map((opt) => {
         const isSelected = opt.value === value;
@@ -356,12 +444,12 @@ Replace every native `<select>` with a shadowless Toss-style combobox trigger + 
               onClick={() => handleSelect(opt.value)}
               className={`flex min-h-[44px] w-full items-center justify-between gap-3 rounded-[12px] px-3.5 py-2.5 text-left text-[16px] transition-colors duration-100 ${
                 isSelected
-                  ? 'bg-[#E2EEFF] font-bold text-[#1B64DA]'
-                  : 'font-medium text-[#191F28] hover:bg-[#ECF2FA]'
+                  ? 'bg-[var(--color-primary-soft)] font-bold text-[var(--color-primary-text)]'
+                  : 'font-medium text-[var(--text-primary)] hover:bg-[var(--surface-tint-hover)]'
               }`}
             >
               <span className="truncate">{opt.label}</span>
-              {isSelected && <Check aria-hidden="true" className="h-[18px] w-[18px] shrink-0 text-[#3182F6]" strokeWidth={2.5} />}
+              {isSelected && <Check aria-hidden="true" className="h-[18px] w-[18px] shrink-0 text-[var(--color-primary)]" strokeWidth={2.5} />}
             </button>
           </li>
         );
@@ -371,24 +459,22 @@ Replace every native `<select>` with a shadowless Toss-style combobox trigger + 
 </div>
 ```
 
-### C. Complete Native Browser UI Leak Replacement Matrix
+### C. Complete Native Browser UI Leak Replacement Matrix (15 Offenders)
 
-Beyond checkboxes and `<select>`, neutralize EVERY remaining OS-default widget and browser popup leak:
-
-| Native Browser Leak | Why It Breaks Toss Clean UX | Mandatory Toss-Style Replacement |
+| Native Browser Leak | Why It Breaks Toss Clean UX | Mandatory Dual-Theme Toss Replacement |
 | :--- | :--- | :--- |
-| **`<input type="radio">`** | Tiny gray OS circle with harsh border and inconsistent dot fill | **`TossRadio`** (`sr-only` input + `22px` `rounded-full` `#F9FBFF` ring → `#3182F6` `2px` border + `10px` inner dot) or full-row **`TossSelectChip`** |
-| **Raw checkbox used as toggle** | Ambiguous immediate on/off state in settings | **`TossSwitch`** (`role="switch"`, `aria-checked`, `48px × 28px` pill track `#D5DFEE` off / `#3182F6` on, `22px` `#F9FBFF` thumb animated with `TOSS_SPRING`, `min-h-[44px]` hit target) |
-| **`<input type="range">`** | Jagged OS slider track/thumb differing wildly on Safari/Chrome/Windows | **`TossSlider`** (`role="slider"`, `6px` `rounded-full bg-[#E8EFFA]` track, `#3182F6` filled range, `22px` `#F9FBFF` thumb with `2px solid #3182F6`, `44px` hit box, `tabular-nums` value) |
-| **`<input type="date\|time\|datetime-local\|month\|week">`** | Unstylable OS calendar popups, tiny gray icons, broken Korean UX | **`TossDatePicker`** (shadowless `rounded-[20px]` React calendar grid popover on desktop / Toss BottomSheet calendar or wheel picker on mobile, `Intl.DateTimeFormat('ko-KR')`, `tabular-nums`) |
-| **`<input type="file">`** | Hardcoded OS `"파일 선택 / 선택된 파일 없음"` button in system font | **`TossFileUpload`** (`sr-only` `<input type="file">` triggered by `rounded-[14px]` Toss button or `#ECF2FA`/`#F9FBFF` dashed dropzone + Lucide `Upload` + selected file badge with icon-only `X` clear) |
-| **`<input type="color">`** | Tiny beveled OS swatch box & system dialog | **`TossColorPicker`** (curated tonal swatch buttons `rounded-[8px]` + validated `#HEX` `TossTextField`) |
-| **`<input type="number">`** | Ugly OS up/down spin arrows + accidental scroll-wheel value mutation | Use **`type="text" inputMode="numeric"`** (or `decimal`) with explicit formatting; if stepping is needed, add clean `Minus` / `Plus` icon-only buttons (`40px+`) |
-| **`<input type="search">`** | Clashing OS blue/gray `×` cancel button | Strip `::-webkit-search-cancel-button` in base CSS and render a clean Lucide `X` icon-only clear button (`aria-label="검색어 지우기"`) |
-| **`<datalist>`** | Unstylable OS autocomplete dropdown | **`TossCombobox`** reusing `TossSelect` shadowless `rounded-[18px] p-1.5` listbox + `rounded-[12px]` rows |
-| **`<progress>` / `<meter>`** | Ugly striped/beveled OS bars | **`TossProgressBar`** (`role="progressbar"`, `h-2 rounded-full bg-[#E8EFFA]` + `#3182F6` smooth bar, `tabular-nums` label) |
-| **`window.alert / confirm / prompt`** | Freezes main thread, pops jarring OS modal with browser URL header | **`TossDialog`** (`role="alertdialog" aria-modal="true"`, shadowless `rounded-[20px] bg-[#F9FBFF]`) for decisions; **`TossToast`** (`role="status" aria-live="polite"`, `rounded-[14px] bg-[#191F28] text-[#F9FBFF]`) for transient feedback |
-| **Native HTML `title="..."` tooltip** | Delayed (~1s) ugly yellow/gray OS box, fails on touch | Remove `title` on interactive controls; use `aria-label` + custom React **`TossTooltip`** (`rounded-[8px] bg-[#191F28] text-[#F9FBFF] text-[14px]`, `300ms` first / `0ms` adjacent hover) |
-| **HTML5 constraint validation bubble** | Ugly orange/white OS speech bubble (`"이 입력란을 작성하세요."`) | Always put **`noValidate`** on `<form>` and render calm `#1B64DA` inline validation below the field |
-| **`<details>` / `<summary>` default `▸`** | Jagged browser triangle & abrupt snap | Strip `::-webkit-details-marker` or build custom React accordion (`button aria-expanded` + rotating `ChevronDown` + CSS `grid-template-rows`) |
-| **Hidden CSS Chrome Leaks** | Yellow/blue `:-webkit-autofill`, mobile gray tap flash, Edge duplicate password eye `::-ms-reveal`, bulky Windows scrollbars, jagged `<textarea>` resize gripper | Neutralized globally in Section 2 `@layer base` CSS shield (`0 0 0 1000px inset` autofill override, `-webkit-tap-highlight-color: transparent`, `::-ms-reveal: none`, `resize: none` + `field-sizing: content`, `6px` subtle blue-tinted scrollbar) |
+| **`<input type="checkbox">`** | White box + harsh gray border + `3px` corners in both Light & Dark | **`TossCheckbox`** (`sr-only` + `22px` `rounded-[7px]` + `var(--color-primary)` fill + `Check`/`Minus`) |
+| **`<input type="radio">`** | Tiny gray OS circle with inconsistent dot | **`TossRadio`** (`sr-only` + `22px` `rounded-full` ring + `10px` inner dot) or **`TossSelectChip`** |
+| **Raw checkbox as toggle** | Ambiguous immediate on/off state | **`TossSwitch`** (`role="switch"`, `48px × 28px` pill track, `22px` thumb animated with `TOSS_SPRING`, `>= 44px` hit target) |
+| **`<select>` / `<datalist>`** | OS-dependent gray/dark popups | **`TossSelect` / `TossCombobox`** (shadowless `rounded-[18px] p-1.5` listbox + `rounded-[12px]` rows + right `Check`; mobile `< 640px` 5+ items → Select BottomSheet) |
+| **`<input type="range">`** | Jagged OS track/thumb across browsers | **`TossSlider`** (`role="slider"`, `6px` `rounded-full` track + `var(--color-primary)` fill + `22px` thumb, `44px` hit box, `tabular-nums`) |
+| **`<input type="date\|time\|datetime-local\|month\|week">`** | Unstylable OS calendar popups & tiny icons | **`TossDatePicker`** (shadowless `rounded-[20px]` React calendar popover on desktop / BottomSheet picker on mobile, `Intl.DateTimeFormat('ko-KR')`) |
+| **`<input type="file">`** | Hardcoded OS `"파일 선택"` button | **`TossFileUpload`** (`sr-only` `<input type="file">` + `rounded-[14px]` button or dropzone + `Upload` + selected file badge with `X`) |
+| **`<input type="color">`** | Tiny beveled OS swatch & system dialog | **`TossColorPicker`** (`rounded-[8px]` swatches + validated `#HEX` `TossTextField`) |
+| **`<input type="number">`** | OS spin arrows + scroll-wheel value mutation | **`type="text" inputMode="numeric"`** (+ optional `Minus`/`Plus` icon-only stepper buttons) |
+| **`<input type="search">`** | Clashing OS blue/gray `×` cancel button | Strip `::-webkit-search-cancel-button` + custom Lucide `X` clear button (`aria-label="검색어 지우기"`) |
+| **`<progress>` / `<meter>`** | Ugly striped/beveled OS bars | **`TossProgressBar`** (`role="progressbar"`, `h-2 rounded-full bg-[var(--surface-recessed)]` + `var(--color-primary)` bar) |
+| **`window.alert / confirm / prompt`** | Freezes main thread, pops ugly OS dialog | **`TossDialog`** (`role="alertdialog" aria-modal="true"`, `rounded-[20px]`) or **`TossToast`** (`role="status" aria-live="polite"`) |
+| **Native HTML `title="..."` tooltip** | Delayed (~1s) yellow/gray OS tooltip | Remove `title`; pair `aria-label` + custom **`TossTooltip`** (`rounded-[8px]`, `300ms` first / `0ms` adjacent hover) |
+| **HTML5 constraint validation bubble** | Orange/white OS speech bubble | Always put **`noValidate`** on `<form>` + calm inline `text-[var(--color-primary-text)]` guidance |
+| **`<details>` / `<summary>` & CSS Chrome Leaks** | Jagged `▸`, yellow autofill, mobile tap flash, Edge eye icon, bulky scrollbars, textarea resizer | Neutralized globally in Section 2 `@layer base` CSS shield (`0 0 0 1000px inset` autofill, `-webkit-tap-highlight-color: transparent`, `::-ms-reveal: none`, `resize: none` + `field-sizing: content`, `6px` subtle scrollbar) |

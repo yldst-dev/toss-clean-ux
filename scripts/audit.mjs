@@ -120,18 +120,22 @@ const JARGON_REGEX =
   /(진단|산출|프로세스|솔루션|컨설팅|데이터|제출|이차보전|경정청구|운전자금|대환|매칭|리포트|가조회|적합도|보증서|세액공제|소급|재무제표|공동인증서|AES-256|TLS\s*1|NICE|KCB|B2B|SaaS|CFO)/;
 
 const SHADOW_REGEX = /(box-shadow|drop-shadow|text-shadow|\bshadow-|\bshadow\b)/i;
+const SAFE_INSET_BOX_SHADOW_REGEX =
+  /box-shadow\s*:\s*(?:inset\s+0(?:px)?\s+0(?:px)?\s+0(?:px)?\s+(?:[12]px|1000px)\s+[^;]+|0(?:px)?\s+0(?:px)?\s+0(?:px)?\s+(?:[12]px|1000px)\s+[^;]+\binset\b)/i;
 const PURE_WHITE_BLACK_REGEX =
   /(#ffffff\b|#fff\b|#000000\b|#000\b|\bbg-white\b|\bbg-black\b|\btext-black\b)/i;
-const TINY_FONT_REGEX = /text-\[(10|11|12|13)(\.[0-9]+)?px\]/;
+const TINY_FONT_REGEX = /text-\[(10|11|12)(\.[0-9]+)?px\]/;
 const OVER_ROUNDED_REGEX = /\brounded-(3xl|\[(?:2[6-9]|[3-9]\d)px\])\b/;
 const TOO_SHARP_CARD_REGEX = /\brounded-(none|sm|\[[0-4]px\])\b/;
 const MIDDOT_CONCAT_REGEX = /\s·\s|['"`]\s*·\s*['"`]/;
 const INTUITIVE_ICON_REDUNDANT_LABEL_REGEX =
-  /<(X|Copy|RotateCw|RefreshCw|Trash2|Search|Download|ExternalLink|Settings|Pause|Play)\b[^>]*\/>[\s\S]{0,90}?(닫기|복사|새로고침|삭제|검색|다운로드|설정|일시정지|재생)/g;
+  /<(X|Copy|RotateCw|RefreshCw|Trash2|Search|Download|ExternalLink|Settings|Pause|Play|Sun|Moon)\b[^>]*\/>[\s\S]{0,90}?(닫기|복사|새로고침|삭제|검색|다운로드|설정|일시정지|재생)/g;
 const DISABLED_SUBMIT_ANTI_PATTERN_REGEX =
   /<(?:button|TossButton)\b[^>]*type=["']submit["'][^>]*disabled=\{[^}]*(?:!isValid|!canSubmit|!isFormValid|!consent|!checked|!agreed)/g;
 
 let glassBlurCount = 0;
+let cssFileCount = 0;
+let hasDarkThemeTokens = false;
 
 for (const file of files) {
   const r = rel(file);
@@ -161,6 +165,10 @@ for (const file of files) {
   }
 
   if (ext === '.css') {
+    cssFileCount += 1;
+    if (/(\[data-theme=["']dark["']\]|prefers-color-scheme\s*:\s*dark|^\s*\.dark\b)/m.test(content)) {
+      hasDarkThemeTokens = true;
+    }
     const bareFocusVisibleMatch = content.match(/(^|[\s{;]):focus-visible\s*\{[^}]*outline\s*:/m);
     if (bareFocusVisibleMatch) {
       const idx = content.slice(0, bareFocusVisibleMatch.index).split(/\r?\n/).length;
@@ -275,7 +283,7 @@ for (const file of files) {
           'custom-form-controls',
           file,
           tag.lineNo,
-          `Native browser <${nativeMeterTag}> leaks OS chrome. Render a custom role="progressbar" bar (h-2 rounded-full bg-[#E8EFFA] + #3182F6 fill).`,
+          `Native browser <${nativeMeterTag}> leaks OS chrome. Render a custom role="progressbar" bar (h-2 rounded-full bg-[var(--surface-recessed)] + var(--color-primary) fill).`,
         );
       }
     }
@@ -286,7 +294,7 @@ for (const file of files) {
           'native-browser-popup',
           file,
           tag.lineNo,
-          'Add `noValidate` to <form> to suppress ugly OS constraint validation bubbles and show calm inline #1B64DA guidance.',
+          'Add `noValidate` to <form> to suppress ugly OS constraint validation bubbles and show calm inline guidance.',
         );
       }
     }
@@ -311,11 +319,14 @@ for (const file of files) {
     if (!code.trim()) return;
 
     if (SHADOW_REGEX.test(code)) {
-      const isAutofillInsetMask =
-        ext === '.css' && /box-shadow\s*:\s*0\s+0\s+0\s+1000px\s+[^;]+\binset\b/i.test(code);
-      if (!isAutofillInsetMask) {
-        fail('shadowless', file, lineNo, `Shadow token/class detected: ${code.trim()}`);
+      const isSafeInsetCss = ext === '.css' && SAFE_INSET_BOX_SHADOW_REGEX.test(code);
+      if (!isSafeInsetCss) {
+        fail('shadowless', file, lineNo, `Drop/blur shadow token/class detected: ${code.trim()}`);
       }
+    }
+
+    if (PURE_WHITE_BLACK_REGEX.test(code)) {
+      fail('blue-white-palette', file, lineNo, `Pure white/black detected: ${code.trim()}`);
     }
 
     if ((isPresentation || isApplication) && /(?:window\.|(?<![.\w]))(alert|confirm|prompt)\s*\(/.test(code)) {
@@ -325,10 +336,6 @@ for (const file of files) {
         lineNo,
         `Native browser popup (${code.trim()}) breaks Toss UX. Use shadowless React TossDialog or TossToast instead.`,
       );
-    }
-
-    if (PURE_WHITE_BLACK_REGEX.test(code)) {
-      fail('blue-white-palette', file, lineNo, `Pure white/black detected: ${code.trim()}`);
     }
 
     if (isPresentation) {
@@ -348,12 +355,20 @@ for (const file of files) {
           'Prefer explicit `focus:outline-none focus-visible:outline-none` alongside `focus:ring-*` to guarantee zero double focus borders.',
         );
       }
-      if (/#8B95A1/i.test(code) && /text-\[#8B95A1\]/i.test(code)) {
+      if (/text-\[#8B95A1\]/i.test(code)) {
         warn(
           'wcag-aa-contrast',
           file,
           lineNo,
-          '`text-[#8B95A1]` falls below WCAG AA 4.5:1 on light blue-white canvases (~2.8:1). Prefer `#64707D` (`>= 4.6:1`) for legible muted text.',
+          '`text-[#8B95A1]` falls below WCAG AA 4.5:1 on light canvases (~2.8:1). Use `text-[var(--text-muted)]` (`#64707D` light / `#9E9EA4` dark).',
+        );
+      }
+      if (/dark:text-\[#3182F6\]/i.test(code) || /text-\[#(?:62626D|4D4D59)\]/i.test(code)) {
+        warn(
+          'wcag-aa-contrast',
+          file,
+          lineNo,
+          'Low-contrast dark-mode text detected. Use `text-[var(--color-primary-text)]` (`#61B0FF`) for dark blue text and `text-[var(--text-muted)]` (`#9E9EA4`) for dark muted text.',
         );
       }
       if (OVER_ROUNDED_REGEX.test(code)) {
@@ -364,12 +379,12 @@ for (const file of files) {
           `Over-rounded balloon corner detected (keep cards <= 20px, controls 12px–14px): ${code.trim()}`,
         );
       }
-      if (TOO_SHARP_CARD_REGEX.test(code) && /(border|toss-surface|input|button|bg-\[#)/.test(code)) {
+      if (TOO_SHARP_CARD_REGEX.test(code) && /(border|toss-surface|input|button|bg-\[)/.test(code)) {
         fail(
           'balanced-radius',
           file,
           lineNo,
-          `Harshly boxy corner (0px–4px) on surface/control (use 8px badges, 12px–14px controls, 18px–20px cards): ${code.trim()}`,
+          `Harshly boxy corner (0px–4px) on surface/control (use 7px checkbox, 8px badges, 12px–14px controls, 18px–20px cards): ${code.trim()}`,
         );
       }
       if (/rounded-full/.test(code) && /(input|tablist|px-[3-6]|w-full)/.test(code)) {
@@ -382,10 +397,18 @@ for (const file of files) {
       }
       if (/(?:^|[\s"'`])(min-)?h-screen\b/.test(code)) {
         fail(
-          'scroll-less-responsive',
+          'viewport-scroll-ergonomics',
           file,
           lineNo,
-          'Avoid `h-screen` / `min-h-screen` (100vh breaks iOS mobile viewport). Use `min-h-[100dvh]` or `lg:h-[100dvh]`.',
+          'Avoid `h-screen` / `min-h-screen` (100vh clips behind mobile browser bars). Use `min-h-[100dvh]` for breathable natural scroll (or `lg:h-[100dvh]` only for multi-pane live tools).',
+        );
+      }
+      if (/(?:^|[\s"'`])h-\[100dvh\]/.test(code) && /\boverflow-hidden\b/.test(code)) {
+        warn(
+          'viewport-scroll-ergonomics',
+          file,
+          lineNo,
+          'Unconditional `h-[100dvh] overflow-hidden` traps mobile/content pages in a cramped scroll lock. Prefer breathable `min-h-[100dvh]` natural scroll, or scope split-pane shells strictly to `lg:h-[100dvh]`.',
         );
       }
     }
@@ -417,7 +440,15 @@ for (const file of files) {
 
     if (isPresentation) {
       if (TINY_FONT_REGEX.test(code)) {
-        fail('senior-font-size', file, lineNo, `Font < 14px found: ${code.trim()}`);
+        fail('senior-font-size', file, lineNo, `Font <= 12px found (keep consumer UI >= 14px): ${code.trim()}`);
+      }
+      if (/text-\[13(\.[0-9]+)?px\]/.test(code) && !/tabular-nums/.test(code)) {
+        warn(
+          'senior-font-size',
+          file,
+          lineNo,
+          `13px text found without tabular-nums: keep consumer/senior UI >= 14px (13px tabular-nums permitted only in dense data table cells): ${code.trim()}`,
+        );
       }
       if (/framer-motion/.test(code)) {
         fail('motion-import', file, lineNo, `Use 'motion/react' instead of 'framer-motion'`);
@@ -478,6 +509,15 @@ for (const file of files) {
   });
 }
 
+if (cssFileCount > 0 && !hasDarkThemeTokens) {
+  warn(
+    'dark-mode-ready',
+    rootDir,
+    0,
+    'No dark theme tokens detected in CSS (`[data-theme="dark"]`, `.dark`, or `prefers-color-scheme: dark`). Define paired Toss Cool-Dark semantic tokens (`#101013` / `#17171C` / `#202027` / `#2C2C35`).',
+  );
+}
+
 for (const [kw, locations] of Object.entries(reassuranceHits)) {
   if (locations.length > 1) {
     fail(
@@ -486,8 +526,6 @@ for (const [kw, locations] of Object.entries(reassuranceHits)) {
       Number(locations[0].split(':')[1]) || 1,
       `Keyword "${kw}" repeated ${locations.length} times (max 1): ${locations.join(', ')}`,
     );
-  } else if (locations.length === 0) {
-    warn('zero-duplication', rootDir, 0, `Reassurance keyword "${kw}" not found (verify intentional)`);
   }
 }
 
@@ -507,15 +545,15 @@ console.log(`\ntoss-clean-ux audit — scanned ${files.length} files under ${roo
 
 if (findings.length === 0) {
   console.log('✓ PASS — 0 violations across all gates:');
-  console.log('  • Shadowless OKLCH 4-level blue-white tokens (0 shadows, 0 pure white/black)');
+  console.log('  • Dual-theme shadowless OKLCH system (Light Blue-White + Toss Cool-Dark, 0 drop shadows, 0 pure white/black)');
   console.log('  • Single focus ring (0 double-border CSS/input collisions)');
-  console.log('  • Balanced concentric squircle radii (8px badges, 12px–14px controls, 18px–20px cards)');
+  console.log('  • Balanced concentric squircle radii (7px checkbox, 8px badges, 12px–14px controls, 18px–20px cards/menus)');
   console.log('  • Zero native browser UI leaks (0 raw checkbox/radio/file/range/date/select/progress/alert popups)');
   console.log('  • Clean multi-channel badges & punctuation hygiene (0 em-dash/middot metric walls)');
-  console.log('  • Scroll-less responsive viewport guardrails (0 h-screen traps)');
+  console.log('  • Breathable viewport scroll ergonomics (0 h-screen traps, natural scroll first)');
   console.log('  • Anti-AI-slop rules (0 forbidden patterns, glass surfaces: ' + glassBlurCount + '/1)');
   console.log('  • Zero-duplication reassurance copy (<= 1 exposure each)');
-  console.log('  • Plain-Korean readability & >= 14px senior typography');
+  console.log('  • Plain-Korean readability & >= 14px consumer typography');
   console.log('  • Strict 4-layer Clean Architecture dependency boundaries');
   if (runBuild && buildPassed) {
     console.log('  • Clean production build (npm run build passed)');

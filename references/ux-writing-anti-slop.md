@@ -17,11 +17,11 @@ Every visible sentence must satisfy Toss's 5 Core Values (**Clear · Concise · 
 - **No Em-Dash (`—`) Chains**: Never join clauses or subtitles with `—`. Split into separate typography elements, line breaks, or natural Korean sentence endings.
 - **No Middle-Dot (`·`) Metric Concatenation**: Never jam multiple metrics, statuses, or metadata values into one string separated by `·`:
   - Bad: `대비 7.5 · 수정 1회` / `직접 입력 · 52점 → 0점 (-52)` / `서울 강남구 · 4년 차 · 카페`
-  - Good: Render each item as a clean, understated **multi-channel metadata badge** (`rounded-[8px]`, `#ECF2FA` / `#E2EEFF` / `#E6F6EE`, `gap-1.5`–`gap-2`, `tabular-nums`, semantic icon + text for status) or aligned columns.
-  - Keep `·` ONLY inside standard Korean compound nouns (`시·군·구`, `어린이·시니어`), never as a layout separator between stats.
+  - Good: Render each item as a clean, understated **multi-channel metadata badge** (`rounded-[8px]`, `gap-1.5`–`gap-2`, `tabular-nums`, semantic icon + text for status) or aligned columns.
+  - Keep `·` ONLY inside standard Korean compound nouns (`시·군·구`, `예금·적금`, `어린이·시니어`), never as a layout separator between stats.
 
 ### Icon-Only Self-Explanatory Buttons (NN/g Verified)
-- Only the **12 universal icons** (`X`, `Copy`, `RotateCw`/`RefreshCw`, `Trash2`, `Search`, `Download`, `ExternalLink`, `ArrowLeft`, `ChevronLeft/Right`, `Settings`, `Pause/Play`, `MoreHorizontal`) render **icon only** with zero redundant words (`닫기`, `복사`, `새로고침`, `삭제`, `검색`).
+- Only **universal icons** (`X`, `Copy`, `RotateCw`/`RefreshCw`, `Trash2`, `Search`, `Download`, `ExternalLink`, `ArrowLeft`, `ChevronLeft/Right`, `Settings`, `Pause/Play`, `MoreHorizontal`, `Sun/Moon`) render **icon only** with zero redundant words (`닫기`, `복사`, `새로고침`, `삭제`, `검색`).
 - Every icon-only button requires `aria-label` (and desktop instant-subsequent tooltip).
 - Ambiguous or domain-specific actions (`전후 비교`, `내 지원금 확인하기`) ALWAYS keep short, clear Korean text labels.
 
@@ -44,7 +44,7 @@ Every visible sentence must satisfy Toss's 5 Core Values (**Clear · Concise · 
 
 ---
 
-## 2. Zero-Duplication Map (1 Message = 1 Exposure)
+## 2. Zero-Duplication Map (1 Message = 1 Exposure, When Reassurance Copy Applies)
 
 | Region | Allowed Message | Strictly Banned Duplicates |
 | :--- | :--- | :--- |
@@ -57,25 +57,25 @@ Every visible sentence must satisfy Toss's 5 Core Values (**Clear · Concise · 
 
 ---
 
-## 3. Anti-AI-Slop Ban List (Synthesized from 6 Skills + Research)
+## 3. Anti-AI-Slop Ban List (Synthesized from Live Toss Audit + 6 Skills)
 
 Reject every item below unless explicitly requested by the user:
 1. **Double focus borders** — Never stack global `:focus-visible` `outline` + `focus:ring-*` (or `focus:border-*` + `focus:ring-*`).
 2. **Extreme or mismatched corner radii** — Ban `0px–4px` sharp corners on cards/list rows/inputs AND ban `rounded-full` / `>= 26px` balloons on rectangular containers; enforce `R_inner = R_outer - P` + progressive `corner-shape: squircle`.
-3. **Low-contrast muted text & color-only statuses** — Ban `#8B95A1` on light canvases (`< 4.5:1`); use `#64707D` (`>= 4.5:1`) and pair color + icon/text on status badges.
+3. **Low-contrast text, pure `#000000`/`#FFFFFF` glare & color-only statuses** — Ban `#8B95A1` on light canvases (`< 4.5:1`), ban `#62626D` or low-luminance `#3182F6` text on dark canvases (`use #9E9EA4` muted ink and `#449BFF`–`#61B0FF` blue text in dark mode), ban pure `#000000`/`#FFFFFF` surfaces, and pair color + icon/text on status badges.
 4. **Disabled submit buttons for validation** — Never grey-out/disable submit CTAs waiting for form validity; keep clickable and guide to the first error on submit.
-5. **Raw native browser widgets, OS popups & browser chrome leaks** — Never expose OS-default `<input type="checkbox|radio|file|range|date|time|color">`, `<select>`, `<datalist>`, `<progress>`, `<meter>`, `window.alert/confirm/prompt`, native `title="..."` tooltips, or HTML5 constraint validation bubbles (`<form>` without `noValidate`). Replace with shadowless Toss-style React components (`TossCheckbox`, `TossSelect`, `TossSwitch`, `TossSlider`, `TossDatePicker`, `TossFileUpload`, `TossDialog`, `TossToast`, `TossTooltip`) and apply the global CSS Browser Chrome Shield (`:-webkit-autofill`, `-webkit-tap-highlight-color`, `::-ms-reveal`, scrollbars, `resize: none`).
+5. **Raw native browser widgets, OS popups & browser chrome leaks** — Never expose OS-default `<input type="checkbox|radio|file|range|date|time|color">`, `<select>`, `<datalist>`, `<progress>`, `<meter>`, `window.alert/confirm/prompt`, native `title="..."` tooltips, or HTML5 constraint validation bubbles (`<form>` without `noValidate`). Replace with shadowless dual-theme React components and apply the global CSS Browser Chrome Shield (`:-webkit-autofill`, `-webkit-tap-highlight-color`, `::-ms-reveal`, scrollbars, `resize: none`).
 6. **Middle-dot (`·`) & em-dash (`—`) text walls** — Replace middot-glued metrics with clean tonal badges; remove decorative em-dashes.
 7. **Redundant text on self-evident icon buttons** — Never put `닫기`/`복사`/`새로고침` beside universal icons.
-8. **Endless vertical scroll sprawl & cluttered side-tabs** — Prefer `100dvh` viewport-first layouts, quiet chrome, and max 1 navigation axis.
-9. **Nested cards, card walls & 3-up card grids (`lg:grid-cols-3`)** — Use hairline `divide-y`/`divide-x` lists or spacious 2-column layouts.
+8. **Claustrophobic scroll-locked traps AND bloated multi-rail chrome** — Never trap landing/form/editorial/docs pages inside cramped `h-[100dvh] overflow-hidden` boxes; embrace spacious natural scrolling (`min-h-[100dvh]`) with One Thing per Section + Peek Effect, and reserve `lg:h-[100dvh]` split-pane shells strictly for live multi-pane tools.
+9. **Nested cards, card walls & 3-up feature card grids (`lg:grid-cols-3`)** — Use airy open lists (`toss.tech` style), hairline `divide-y`/`divide-x` lists, or spacious 2-column layouts.
 10. **Gradients, glows, pulsing halos (`animate-ping`), kickers, `01/02/03` ordinals, hype badges, pastel icon tiles, `Sparkles`, emojis, `line-through`, `transition-all`, hover lift on static cards, `Inter`/`Roboto`/`Space Grotesk` defaults**.
 
 ---
 
 ## 4. Web Interface Guidelines Checklist
 
-- **Accessibility**: Skip link (`#main-content`), `aria-label` on every icon-only button, `aria-hidden="true"` on decorative icons, `aria-live="polite"` on async errors/results, `role="dialog" aria-modal="true"` + ESC close + `overscroll-contain` + `scrollbar-gutter: stable` on modals, pause/resume toggle on auto-rotating tickers (> 5s).
+- **Accessibility & Dual Theme**: Skip link (`#main-content`), `aria-label` on every icon-only button (including `Sun/Moon` theme switcher), `aria-hidden="true"` on decorative icons, `aria-live="polite"` on async errors/results, `role="dialog" aria-modal="true"` + ESC close + `overscroll-contain` + `scrollbar-gutter: stable` on modals, pause/resume toggle on auto-rotating tickers (> 5s), FOUC-free Light/Dark theme persistence.
 - **Forms**: Always put `noValidate` on `<form>`; fixed `<label htmlFor>` above every `<input>` / custom `TossSelect`; custom React `TossCheckbox` / `TossSelect` / `TossSwitch` / `TossSlider` / `TossDatePicker` / `TossFileUpload` (zero raw native widgets, zero `alert/confirm/prompt`, zero `title="..."` tooltips); WAI-ARIA keyboard listbox on `TossSelect` (`ArrowUp/Down`, `Enter`, `Esc`, focus return); prefer `type="text" inputMode="numeric"` over `type="number"`; explicit `name`, `autoComplete`, `spellCheck={false}`, never block paste, real ellipsis `…`, never disable submit for validation, auto-focus first invalid field on submit, `focus:outline-none focus-visible:outline-none`.
 - **Formatting & Stability**: `Intl.DateTimeFormat('ko-KR')`, `toLocaleString('ko-KR')`, `translate="no"` on brand names/codes, `whitespace-nowrap` on phone numbers/codes, `interactive-widget=resizes-content` in viewport meta, `@media (hover: hover) and (pointer: fine)` hover gating.
-- **Required States**: Loading (zero-CLS skeleton), empty (with recovery CTA), gentle error, duplicate/conflict, completion, and `360px` mobile states.
+- **Required States**: Loading (zero-CLS skeleton), empty (with recovery CTA), gentle error, duplicate/conflict, completion, Light & Dark modes, and `360px` mobile states.
