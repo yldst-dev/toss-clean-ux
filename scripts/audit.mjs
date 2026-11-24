@@ -119,6 +119,11 @@ const reassuranceHits = Object.fromEntries(REASSURANCE_KEYWORDS.map((k) => [k, [
 const JARGON_REGEX =
   /(진단|산출|프로세스|솔루션|컨설팅|데이터|제출|이차보전|경정청구|운전자금|대환|매칭|리포트|가조회|적합도|보증서|세액공제|소급|재무제표|공동인증서|AES-256|TLS\s*1|NICE|KCB|B2B|SaaS|CFO)/;
 
+const LLM_FILLER_REGEX =
+  /(환영합니다|올인원\s*(플랫폼|솔루션|서비스)|혁신적인\s*(플랫폼|서비스|경험)|차세대\s*(플랫폼|솔루션)|원스톱\s*(서비스|솔루션)|지금\s*바로\s*경험해|아래\s*(버튼|입력창)을?\s*(클릭|눌러|입력)|Welcome to\b|All-in-one platform|Next-generation\b|Revolutionize\b|Seamlessly\b)/i;
+
+const KICKER_SPAM_REGEX = /\buppercase\b[^"'`]*\btracking-(?:widest|\[0\.[123]\d*em\])/;
+
 const SHADOW_REGEX = /(box-shadow|drop-shadow|text-shadow|\bshadow-|\bshadow\b)/i;
 const SAFE_INSET_BOX_SHADOW_REGEX =
   /box-shadow\s*:\s*(?:inset\s+0(?:px)?\s+0(?:px)?\s+0(?:px)?\s+(?:[12]px|1000px)\s+[^;]+|0(?:px)?\s+0(?:px)?\s+0(?:px)?\s+(?:[12]px|1000px)\s+[^;]+\binset\b)/i;
@@ -471,6 +476,14 @@ for (const file of files) {
       if (/\bSparkles\b/.test(code)) {
         fail('anti-slop', file, lineNo, `Default Sparkles icon forbidden; use semantic icon`);
       }
+      if (KICKER_SPAM_REGEX.test(code)) {
+        warn(
+          'copy-bloat-70-cut',
+          file,
+          lineNo,
+          'Uppercase wide-tracked eyebrow kicker detected. Purge decorative kickers (70% Copy Purge) and let the headline stand cleanly.',
+        );
+      }
       if (/—/.test(code)) {
         fail(
           'punctuation-hygiene',
@@ -496,9 +509,36 @@ for (const file of files) {
     }
 
     if (isUserCopyFile) {
+      const isLegalOrTermsFile = /(terms|privacy|policy|legal|consentdetail)/i.test(r);
       const jargonMatch = code.match(JARGON_REGEX);
       if (jargonMatch) {
         fail('plain-korean', file, lineNo, `Hard jargon "${jargonMatch[0]}": ${code.trim()}`);
+      }
+      const fillerMatch = code.match(LLM_FILLER_REGEX);
+      if (fillerMatch) {
+        warn(
+          'copy-bloat-70-cut',
+          file,
+          lineNo,
+          `LLM filler / happy-talk phrase "${fillerMatch[0]}" detected. Apply the 70% Copy Purge rule and re-layout around concrete essential copy.`,
+        );
+      }
+      if (!isLegalOrTermsFile && /[가-힣]/.test(code) && !/(className=|import\s+|from\s+['"]|aria-label=|placeholder=)/.test(code)) {
+        const plainText = code
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/\{[^}]*\}/g, ' ')
+          .replace(/^\s*(?:const|let|var|return|\w+\s*:)\s*/, '')
+          .replace(/['"`,;]/g, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+        if (plainText.length >= 90 && (plainText.match(/[가-힣]/g) || []).length >= 30) {
+          warn(
+            'copy-bloat-70-cut',
+            file,
+            lineNo,
+            `Verbose UI copy block (${plainText.length} chars) detected. Cut ~70% redundant/low-priority text (keep <= 1 concise line) and re-layout the section.`,
+          );
+        }
       }
       for (const kw of REASSURANCE_KEYWORDS) {
         if (code.includes(kw)) {
@@ -552,7 +592,7 @@ if (findings.length === 0) {
   console.log('  • Clean multi-channel badges & punctuation hygiene (0 em-dash/middot metric walls)');
   console.log('  • Breathable viewport scroll ergonomics (0 h-screen traps, natural scroll first)');
   console.log('  • Anti-AI-slop rules (0 forbidden patterns, glass surfaces: ' + glassBlurCount + '/1)');
-  console.log('  • Zero-duplication reassurance copy (<= 1 exposure each)');
+  console.log('  • Zero-duplication & 70% copy-purge hygiene (essential concise copy only)');
   console.log('  • Plain-Korean readability & >= 14px consumer typography');
   console.log('  • Strict 4-layer Clean Architecture dependency boundaries');
   if (runBuild && buildPassed) {

@@ -50,4 +50,5 @@ Verify in a real Chromium browser (e.g., `ego-browser`) in BOTH **Light Mode** (
 | **Runtime shadowless check** | `0` non-inset blur `box-shadow` elements (0-blur `1px–2px` `inset` hairlines/focus rings and `1000px inset` autofill masks allowed) |
 | **Typography & Pretendard optics** | Desktop `H1 >= 44px`, Mobile `H1 >= 30px`, consumer min font `>= 14px` (`13px tabular-nums` strictly in dense data table sub-cells), `letter-spacing: 0` on `14px–20px` UI text |
 | **Reward-early-punish-late form E2E** | Submit stays enabled before validation; empty submit focuses first invalid input with calm guidance; typing clears error immediately; `0` console/page errors |
+| **70% copy purge & structural re-layout** | Visually inspect every viewport (`1440×900`, `375×812`): zero happy-talk paragraphs, zero eyebrow kickers, zero obvious click instructions, zero hollow half-empty boxes left after copy deletion; each section communicates One Thing in `<= 3 seconds` with balanced macro/micro whitespace |
 | **Zero-duplication copy check** | Reassurance keywords (`30초`, `무료`, `신용점수`) appear at most `1` time total when used |

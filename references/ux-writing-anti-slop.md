@@ -1,4 +1,32 @@
-# UX Writing, Zero-Duplication & Anti-AI-Slop Rules
+# UX Writing, 70% Copy Purge & Re-Layout, Zero-Duplication & Anti-AI-Slop Rules
+
+## 0. Mandatory Two-Pass Protocol: 70% LLM Copy Purge & Structural Re-Layout
+
+Grounded in **Nielsen Norman Group** (*users read only 20%–28% of words on a web page*), **Steve Krug** (*"Get rid of half the words on each page, then get rid of half of what's left"* = **75% cut**), and LLM verbosity bias studies (LLMs compulsively over-explain, pad cards symmetrically, and stack redundant sections):
+
+### Pass 1 — Ruthless 70% Copy Purge (Keep ONLY the Essential ~30%)
+Audit every visible string on the page and sort it into 3 strict buckets before touching CSS:
+
+| Bucket | Share | What Belongs Here | Action |
+| :--- | :--- | :--- | :--- |
+| **Tier 1: Essential** | **~30%** | Core value headline, raw concrete proof/numbers (`tabular-nums`), clear field labels & unmistakable action buttons, single-exposure safety/gentle error hints | **KEEP & PROMOTE** (enlarge scale, strengthen contrast) |
+| **Tier 2: Secondary** | **~15%** | Detailed terms, calculation breakdown, extended help, edge-case FAQs | **FOLD** behind progressive disclosure (`BottomSheet`, `Dialog`, accordion, `TossTooltip`) |
+| **Tier 3: Redundant / Low-Priority Filler** | **~55%** | Happy talk/greetings (`환영합니다`, `혁신적인 올인원 플랫폼`), eyebrow kickers (`WHY US`, `01.`), subtitles restating headings, obvious UI instructions (`아래 입력창에 적고 버튼을 눌러주세요`), symmetrical card body paragraphs when the title already says it all, repeated trust badges, filler Korean modifiers ("잡초") | **DELETE COMPLETELY** |
+
+#### Concrete Purge + Re-Layout Transformation
+- **Before (Typical LLM Bloated Hero + 3-Card Section — 100% text)**:
+  - Eyebrow kicker `AI 기반 스마트 정책자금 매칭 플랫폼` + 2-line H1 + 3-line welcoming paragraph + 4 trust pills + 3 equal feature cards each containing an icon tile, heading, and 3-line explanation + repeated footer reassurance banner.
+- **After Pass 1 (70% Purged — ~30% Essential Text)**:
+  - 1 crisp H1 (`내가 받을 지원금,\n얼마인지 알아보세요`) + 1 short line (`내 상황만 고르면 받을 돈을 바로 보여드려요.`) + interactive 2-step input card + single reassurance line strictly beneath the final CTA + 1 open hairline proof list (title + concrete number only, 0 body filler).
+
+### Pass 2 — Mandatory Structural Re-Layout ("다시 페이지 배치하라")
+Deleting 70% of text while keeping old LLM boxes intact leaves hollow, lopsided voids. Immediately re-compose the page structure around the surviving 30%:
+1. **Dissolve Emptied Card Shells**: When a card drops from title + 3-line paragraph to title + short metric, remove the heavy card container and switch to an open `toss.tech`-style typographic layout, hairline `divide-y` row list, or clean 2-column anchor pair.
+2. **Merge or Delete Thin Redundant Sections**: If two adjacent LLM sections ("주요 특징" + "도입 효과") shrink to 2 lines each after purging, fuse them into 1 decisive section or cut the weaker section entirely.
+3. **Recalibrate Macro vs. Micro Whitespace**: Expand macro section breathing room (`py-14`–`py-24`) while keeping micro spacing tight (`gap-2`–`gap-3`) between related label/value pairs so sparse copy feels deliberately calm and sculptural.
+4. **Billboard-at-60-mph Scale Check**: Enlarge the surviving focal headline and hero metric so a first-time visitor grasps *what it is* and *what to click* within **3 seconds** without reading a single paragraph.
+
+---
 
 ## 1. Toss UX Writing 5 Core Values & Plain-Korean Test
 
@@ -68,8 +96,9 @@ Reject every item below unless explicitly requested by the user:
 6. **Middle-dot (`·`) & em-dash (`—`) text walls** — Replace middot-glued metrics with clean tonal badges; remove decorative em-dashes.
 7. **Redundant text on self-evident icon buttons** — Never put `닫기`/`복사`/`새로고침` beside universal icons.
 8. **Claustrophobic scroll-locked traps AND bloated multi-rail chrome** — Never trap landing/form/editorial/docs pages inside cramped `h-[100dvh] overflow-hidden` boxes; embrace spacious natural scrolling (`min-h-[100dvh]`) with One Thing per Section + Peek Effect, and reserve `lg:h-[100dvh]` split-pane shells strictly for live multi-pane tools.
-9. **Nested cards, card walls & 3-up feature card grids (`lg:grid-cols-3`)** — Use airy open lists (`toss.tech` style), hairline `divide-y`/`divide-x` lists, or spacious 2-column layouts.
-10. **Gradients, glows, pulsing halos (`animate-ping`), kickers, `01/02/03` ordinals, hype badges, pastel icon tiles, `Sparkles`, emojis, `line-through`, `transition-all`, hover lift on static cards, `Inter`/`Roboto`/`Space Grotesk` defaults**.
+9. **Nested cards, card walls, un-relayed hollow containers & 3-up feature card grids (`lg:grid-cols-3`)** — Never leave half-empty card boxes after cutting copy; dissolve them into airy open lists (`toss.tech` style), hairline `divide-y`/`divide-x` rows, or spacious 2-column layouts.
+10. **LLM verbosity bloat ("happy talk", greetings, obvious click instructions, eyebrow kickers, `01/02/03` ordinals)** — Purge ~70% of non-essential text first, then re-layout the page around the essential ~30%.
+11. **Gradients, glows, pulsing halos (`animate-ping`), hype badges, pastel icon tiles, `Sparkles`, emojis, `line-through`, `transition-all`, hover lift on static cards, `Inter`/`Roboto`/`Space Grotesk` defaults**.
 
 ---
 
