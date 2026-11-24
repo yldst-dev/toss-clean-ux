@@ -38,6 +38,7 @@ Verify in a real Chromium browser (e.g., `ego-browser`) in BOTH **Light Mode** (
 
 | Check | Target Pass Criteria |
 | :--- | :--- |
+| **Visitor intent-first hierarchy (0.5s–3s)** | The exact primary "What" the visitor opened the page to see/do sits immediately at the top visual anchor with zero speculative KPIs or clutter above it; auxiliary controls (`부가기능`) are visibly demoted to quiet secondary triggers/tabs/sheets |
 | **Dual-Theme Light & Dark parity** | Light renders cool blue-white (`#F1F5FB` / `#F9FBFF` / `#ECF2FA`); Dark renders authentic Toss cool-charcoal (`#101013` / `#17171C` / `#202027` / `#2C2C35`); `0` `rgb(255, 255, 255)` and `0` `rgb(0, 0, 0)` backgrounds; reload preserves theme with `0` FOUC |
 | **WCAG AA contrast in BOTH themes** | Light muted ink (`#64707D`, `>= 4.6:1`) and Dark muted ink (`#9E9EA4`, `>= 5.3:1`) + Dark blue text (`#449BFF`–`#61B0FF`) pass `>= 4.5:1`; status badges pair color + icon + text (WCAG 1.4.1) |
 | **Single focus border (zero double border)** | Focus every input/trigger in Light & Dark: `getComputedStyle(el).outlineStyle === 'none'` when `boxShadow` draws an inset ring — visually confirm ONE single blue ring with zero gap/outer halo |

@@ -1,6 +1,31 @@
-# UX Writing, >50% Necessity Gate, 70% Copy Purge & Re-Layout, and Anti-AI-Slop Rules
+# UX Writing, Visitor Intent First, >50% Necessity Gate, 70% Copy Purge & Anti-AI-Slop Rules
 
-## 0. The >50% Necessity Gate ("Manga-Panel Editing" / 만화책 컷 원칙)
+## 0.A Visitor Intent First (Top Tasks + JTBD + Toss "One Thing per Page")
+
+Grounded in **Gerry McGovern's Top Tasks methodology**, **Jobs-to-Be-Done (JTBD)**, and **Toss's "One Thing per Page"** principle:
+> **"특정 페이지에 접속한 사람이 왜 그 페이지에 접속해서 '무엇'을 보고 싶었는지 먼저 따져봐야 합니다. 나머지는 부가기능이거나 없어도 됩니다."**
+
+### Why Inside-Out Design Fails
+- Developers and LLMs routinely build pages **inside-out** — dumping every JSON field, database status column, or org-chart menu onto the top of the screen with equal visual weight.
+- Gerry McGovern's quantitative Top Tasks research reveals a steep Pareto power law: the **vital ~5% of tasks (Top Tasks)** drive user visits, while the **bottom 50% of "tiny tasks" combined account for `< 5%` of user attention** — yet tiny tasks clog headers, bury the main content, and force abandonment.
+
+### Mandatory 3-Bucket Page Intent Triage (Run Before Designing Any Route)
+Write 1 sentence first: *"이 페이지에 접속한 사용자는 [맥락] 때문에 들어왔고, 지금 당장 [단 하나의 핵심 '무엇']을 보거나 해결하고 싶다."* Then classify every candidate UI block:
+
+| Intent Tier | Question to Ask | Placement & Treatment |
+| :--- | :--- | :--- |
+| **1. Core "What" (Top Task / Primary JTBD)** | *"Is this the exact reason the user clicked into this page?"* | **Unobstructed Top-Most Anchor**: Immediate `0.5s–3s` clarity, largest typographic/visual weight, single unambiguous primary CTA, zero speculative KPI/banner clutter above it |
+| **2. Auxiliary ("부가기능" / Supporting Tasks)** | *"Does it help occasionally, without being why they opened the page?"* | **Visually Demoted & Quiet**: Secondary button, clean tab, slide-over `BottomSheet`, `Dialog`, accordion, or below-the-fold secondary band — NEVER allowed to outshout or sit above the Core "What" |
+| **3. Unnecessary ("없어도 됨" / Tiny Tasks & Speculation)** | *"Are we adding this just because the API returns it or to fill space?"* | **OMIT / DELETE COMPLETELY**: Wait until `>50%` of real users prove they need it (Section 0.B) |
+
+#### Real Examples of Visitor-Intent Triage
+- **Site Redesign Result Page**: Core "What" = Before/After visual preview & apply action. Auxiliary = color/font inspector tab, score breakdown sheet. Omitted = `초당 처리량 0.0`, `열린 브라우저 탭 0개`, `격리 0 / 수집 오류 0`.
+- **Policy-Fund Eligibility Page**: Core "What" = Choose business situation → see estimated grant amount. Auxiliary = detailed terms (`BottomSheet`), FAQ answers. Omitted = 3-column generic company promo cards, repeated reassurance banners.
+- **Stock Detail Page (`tossinvest.com`)**: Core "What" = Live price, daily change, chart & buy/sell decision. Auxiliary = community comments, historical financials (tabbed cleanly below).
+
+---
+
+## 0.B The >50% Necessity Gate ("Manga-Panel Editing" / 만화책 컷 원칙)
 
 A great interface is edited like a great comic/manga (**만화책**): **include ONLY the scenes needed to advance the user's current action — cut every unnecessary inner monologue, flashback, and speculative "just-in-case" panel.**
 
@@ -18,7 +43,7 @@ A great interface is edited like a great comic/manga (**만화책**): **include 
 
 ---
 
-## 0.B Mandatory Two-Pass Protocol: 70% LLM Copy Purge & Structural Re-Layout
+## 0.C Mandatory Two-Pass Protocol: 70% LLM Copy Purge & Structural Re-Layout
 
 Grounded in **Nielsen Norman Group** (*users read only 20%–28% of words on a web page*), **Steve Krug** (*"Get rid of half the words on each page, then get rid of half of what's left"* = **75% cut**), and LLM verbosity bias studies (LLMs compulsively over-explain, pad cards symmetrically, and stack redundant sections):
 
@@ -115,9 +140,10 @@ Reject every item below unless explicitly requested by the user:
 7. **Redundant text on self-evident icon buttons** — Never put `닫기`/`복사`/`새로고침` beside universal icons.
 8. **Claustrophobic scroll-locked traps AND bloated multi-rail chrome** — Never trap landing/form/editorial/docs pages inside cramped `h-[100dvh] overflow-hidden` boxes; embrace spacious natural scrolling (`min-h-[100dvh]`) with One Thing per Section + Peek Effect, and reserve `lg:h-[100dvh]` split-pane shells strictly for live multi-pane tools.
 9. **Nested cards, card walls, un-relayed hollow containers & 3-up feature card grids (`lg:grid-cols-3`)** — Never leave half-empty card boxes after cutting copy; dissolve them into airy open lists (`toss.tech` style), hairline `divide-y`/`divide-x` rows, or spacious 2-column layouts.
-10. **Speculative dashboard KPI strips, permanent all-zero error boxes, red-colored `0`s & leaked developer telemetry** — Apply the `>50%` Necessity Gate (Manga-Panel Rule) and Silence When Healthy: omit idle KPI bars (`초당 처리량 0.0`, `열린 탭 0개`) and permanent `격리 0 | 오류 0` counter rows completely; show a single actionable alert only when `count > 0`.
-11. **LLM verbosity bloat ("happy talk", greetings, obvious click instructions, eyebrow kickers, `01/02/03` ordinals)** — Purge ~70% of non-essential text first, then re-layout the page around the essential ~30%.
-12. **Gradients, glows, pulsing halos (`animate-ping`), hype badges, pastel icon tiles, `Sparkles`, emojis, `line-through`, `transition-all`, hover lift on static cards, `Inter`/`Roboto`/`Space Grotesk` defaults**.
+10. **Inside-out API/feature dumps that ignore visitor intent** — Always start from why the user opened the page and what single "What" they came to see; demote auxiliary controls (`부가기능`) and omit everything unrelated.
+11. **Speculative dashboard KPI strips, permanent all-zero error boxes, red-colored `0`s & leaked developer telemetry** — Apply the `>50%` Necessity Gate (Manga-Panel Rule) and Silence When Healthy: omit idle KPI bars (`초당 처리량 0.0`, `열린 탭 0개`) and permanent `격리 0 | 오류 0` counter rows completely; show a single actionable alert only when `count > 0`.
+12. **LLM verbosity bloat ("happy talk", greetings, obvious click instructions, eyebrow kickers, `01/02/03` ordinals)** — Purge ~70% of non-essential text first, then re-layout the page around the essential ~30%.
+13. **Gradients, glows, pulsing halos (`animate-ping`), hype badges, pastel icon tiles, `Sparkles`, emojis, `line-through`, `transition-all`, hover lift on static cards, `Inter`/`Roboto`/`Space Grotesk` defaults**.
 
 ---
 

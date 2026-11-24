@@ -1,10 +1,11 @@
 ---
 name: toss-clean-ux
 description: >-
-  All-in-one Toss-style shadowless OKLCH dual-theme design system (Light
-  Blue-White + Toss Elevated Cool-Dark Mode grounded in live TDS/WTS tokens),
-  single focus ring (zero double borders), balanced concentric squircle radii,
-  zero native browser UI leaks (custom React checkbox/radio/switch/select/
+  Visitor-intent-first (Top Tasks / JTBD / Toss One Thing per Page) Toss-style
+  shadowless OKLCH dual-theme design system (Light Blue-White + Toss Elevated
+  Cool-Dark Mode grounded in live TDS/WTS tokens), single focus ring (zero
+  double borders), balanced concentric squircle radii, zero native browser UI
+  leaks (custom React checkbox/radio/switch/select/
   slider/date/file/dialog/tooltip + autofill/scrollbar/tap-highlight CSS
   shield), icon-only intuitive controls (NN/g + WCAG 2.2), clean multi-channel
   data badges, spacious natural scrolling with Peek Effect (opt-in split-pane
@@ -26,6 +27,10 @@ Build or refactor React + Vite + TypeScript + `motion/react` interfaces grounded
 
 ## Core Non-Negotiables
 
+0. **Visitor Intent First (Gerry McGovern Top Tasks + JTBD + Toss "One Thing per Page")** — BEFORE choosing colors, components, or grids for ANY page or route, explicitly answer ONE question: **"Why did the user land on this exact page, and what single 'What' did they come here to see or finish?"** Gerry McGovern's Top Tasks power law shows the vital ~5% of tasks carry user intent while the bottom 50% of "tiny tasks" combined account for `< 5%` of attention yet ruin navigation and clarity. Classify every proposed block strictly outside-in from visitor intent (NEVER inside-out by dumping database/API fields onto the screen):
+   - **Core "What" (Primary Intent)**: Gets immediate top-of-page hierarchy (`0.5s–3s` recognition), maximum visual clarity, zero preamble or KPI clutter sitting above it, and one unambiguous CTA.
+   - **Auxiliary ("부가기능")**: Useful secondary controls (filters, history, settings, export, terms, deep details) MUST be demoted behind quiet disclosure (secondary button, tab, `BottomSheet`, `Dialog`, accordion, or lower section) so they never compete with the Core "What".
+   - **Unnecessary ("없어도 되는 것")**: Anything that fails the `>50%` Necessity Gate is omitted completely.
 1. **Dual-Theme Shadowless OKLCH System (Light Blue-White + Toss Cool-Dark)** — Zero drop/elevation shadows (`box-shadow` drop blurs, `drop-shadow`, `text-shadow`, `shadow-*`; only zero-blur `1px–2px` `inset` hairlines/focus rings and autofill inset masks are permitted). Zero pure `#FFFFFF`/`bg-white` backgrounds and zero pure `#000000`/`bg-black`/`text-black` anywhere. Always define semantic CSS variables under `:root` (Light Blue-White: `#E8EFFA` / `#F1F5FB` / `#F9FBFF` / `#ECF2FA`, muted ink `#64707D` `>= 4.6:1`) AND `[data-theme="dark"], .dark` (Toss Elevated Cool-Dark: `#101013` / `#17171C` / `#202027` / `#2C2C35`, primary ink `#F2F4F8`, muted ink `#9E9EA4` `>= 5.3:1`, dark primary CTA `#3485FA`, dark link/focus blue `#449BFF`–`#61B0FF`) plus Toss-style cool translucent overlays (`--surface-tint-subtle`, `--surface-tint-hover`, `--border-hairline`). Components reference semantic variables (`var(--...)`) so Light/Dark switching works automatically without FOUC.
    → Full Light + Dark OKLCH token sheet, theme toggle, focus-ring fix, squircle radii, CSS shield & custom controls: [references/design-tokens.md](./references/design-tokens.md)
 2. **Single Focus Border Only (Zero Double Borders)** — Scope global `:focus-visible` strictly to `:where(a, button, [role="button"], [tabindex]):focus-visible` and clear `outline: none` on `input, textarea, select`. Every focusable element owns **exactly one** focus visual (`focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--color-focus-ring)]`; never stack `border` + `ring` + `outline`).
@@ -54,6 +59,13 @@ Build or refactor React + Vite + TypeScript + `motion/react` interfaces grounded
 ---
 
 ## Execution Workflow
+
+### Step 0. Visitor Intent Audit (Mandatory Before Any Design or Code)
+1. For each page or route being built or redesigned, write one explicit **Visitor Intent Statement**: *"이 페이지에 접속한 사람은 [맥락] 때문에 들어왔고, 지금 당장 [단 하나의 핵심 '무엇']을 보고/끝내고 싶다."*
+2. Sort every planned element into 3 strict buckets BEFORE touching layout or code:
+   - **Core "What"**: Placed first at the top visual anchor with zero obstructions above it.
+   - **Auxiliary ("부가기능")**: Demoted cleanly into quiet secondary buttons, tabs, sheets, or lower sections.
+   - **Unnecessary ("없어도 됨")**: Cut immediately via the `>50%` Necessity Gate (Manga-Panel Rule).
 
 ### Step 1. Pre-Modification Audit
 1. Check `package.json` for `motion` (`motion/react`) and `lucide-react`; inspect `index.html` (`viewport-fit=cover`, `interactive-widget=resizes-content`, FOUC-free theme init) and `index.css` (Light + Dark semantic CSS variables, `:focus-visible` double-border traps, Browser Chrome Shield).
